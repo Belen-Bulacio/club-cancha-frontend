@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import { reservasIniciales } from './data/datosIniciales'
+import Clientes from './pages/Clientes'
 import './App.css'
 
 function App() {
@@ -10,13 +11,8 @@ function App() {
   return (
     <>
       <Navbar />
-
-      <main className="container py-5">
-        <h1>Club Cancha</h1>
-        <p>Sistema de gestión de turnos</p>
-
-        <p>Reservas cargadas: {reservas.length}</p>
-      </main>
+      
+      <Clientes />
 
       <Footer />
     </>
