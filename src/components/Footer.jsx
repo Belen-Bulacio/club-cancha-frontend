@@ -18,7 +18,7 @@ function Footer() {
               <li><a href="#">Canchas</a></li>
               <li><a href="#">Horarios</a></li>
               <li><a href="#">Reservar</a></li>
-              <li><a href="#">Contacto</a></li>
+              <li><a href="#">Clientes</a></li>
             </ul>
           </div>
 
