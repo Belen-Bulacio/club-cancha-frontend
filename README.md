@@ -1,16 +1,51 @@
-# React + Vite
+# Club Cancha
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Club Cancha es un sistema web para la gestión de turnos y reservas de canchas deportivas.
 
-Currently, two official plugins are available:
+Este proyecto corresponde al Trabajo Práctico de Programación IV y consiste en la migración del proyecto anterior a React.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Funcionalidades
 
-## React Compiler
+El sistema está organizado en diferentes páginas:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Inicio
+- Canchas
+- Horarios
+- Reservas
+- Clientes
 
-## Expanding the ESLint configuration
+## Tecnologías utilizadas
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- React
+- Vite
+- JavaScript
+- HTML
+- CSS
+- Bootstrap
+- Git y GitHub
+
+## Estructura del proyecto
+
+El proyecto utiliza componentes reutilizables y páginas independientes.
+
+Los componentes compartidos, como Navbar y Footer, se encuentran en src/components.
+
+Las distintas páginas del sistema se encuentran en src/pages.
+
+## Instalación
+
+Clonar el repositorio e instalar las dependencias:
+
+npm install
+
+Para ejecutar el proyecto:
+
+npm run dev
+
+## Integrantes
+
+- Andrada Emilse
+- Bulacio Belén
+- Ortega Lourdes
+- Roldan Analia
+- Soria Laura
