@@ -1,3 +1,5 @@
+const hoy = new Date().toISOString().slice(0, 10)
+
 export const canchas = [
   {
     id: 1,
@@ -23,19 +25,28 @@ export const reservasIniciales = [
   {
     id: 1,
     canchaId: 2,
-    fecha: '2026-10-02',
+    fecha: hoy,
     hora: '19:00',
     cliente: 'Juan Pérez',
     telefono: '3884000000',
-    estado: 'a confirmar',
+    estado: 'confirmada',
   },
   {
     id: 2,
     canchaId: 3,
-    fecha: '2026-10-02',
+    fecha: hoy,
     hora: '21:00',
     cliente: 'Ana Gómez',
     telefono: '3885112233',
-    estado: 'confirmada',
+    estado: 'en curso',
+  },
+  {
+    id: 3,
+    canchaId: 1,
+    fecha: hoy,
+    hora: '18:00',
+    cliente: 'Luis Díaz',
+    telefono: '3886224455',
+    estado: 'cancelada',
   },
 ]

@@ -1,20 +1,38 @@
 :root {
-  --verde-noche:  #0B2B23;   /* navbar y footer */
-  --verde-cancha: #0C6119;   /* del logo: fondo de los hero */
-  --lima:         #B4CD35;   /* del logo: botones y acentos */
-  --cal:          #F2F5EF;   /* fondo general de la pagina */
-  --ladrillo:     #E2593A;   /* turno ocupado */
-  --texto:        #26302C;
+  /* ---- Verdes del club ---- */
+  --verde-noche:  #07211B;   /* navbar, footer y hero */
+  --verde-bosque: #0E3A2F;   /* tono intermedio, para el degradado */
+  --verde-cancha: #12694A;   /* esmeralda, acentos */
+  --lima:         #C3E04A;   /* el acento brillante */
+  --lima-suave:   #EDF6D2;   /* fondos suaves de la marca */
+
+  /* ---- Neutros ---- */
+  --cal:          #F6F8F4;   /* fondo general */
+  --blanco:       #FFFFFF;   /* tarjetas */
+  --linea:        #DFE6DD;   /* bordes */
+  --texto:        #16211C;   /* texto principal */
+  --texto-suave:  #5B6B63;   /* texto secundario */
+
+  /* ---- Estados de una reserva ---- */
+  --ok:        #1B7F4C;   --ok-bg:     #DFF3E6;   /* confirmada */
+  --curso:     #8A5B08;   --curso-bg:  #FDF0CE;   /* en curso */
+  --no:        #B23A22;   --no-bg:     #FBE4DE;   /* cancelada */
+  --ladrillo:  #B23A22;
+
+  /* ---- Forma ---- */
+  --radio:  14px;
+  --sombra: 0 2px 4px rgba(7, 33, 27, 0.04), 0 8px 24px rgba(7, 33, 27, 0.06);
 
   --fuente-titulo: "Barlow Condensed", "Arial Narrow", sans-serif;
   --fuente-texto:  "Work Sans", "Segoe UI", sans-serif;
 }
 
-/* ---- 2. Base de la pagina ---- */
+/* ---- 1. Base de la página ---- */
 body {
   font-family: var(--fuente-texto);
   background-color: var(--cal);
   color: var(--texto);
+  line-height: 1.6;
 }
 
 img {
@@ -25,64 +43,70 @@ img {
 h1, h2, h3, h4, .navbar-brand {
   font-family: var(--fuente-titulo);
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
+  text-wrap: balance;
 }
 
 h1, h2 {
   text-transform: uppercase;
 }
 
-/* ---- 3. Gesto propio 1: la linea de cal en los titulos ---- */
-.titulo-cal {
-  border-left: 5px solid var(--lima);
-  padding-left: 1rem;
+.text-secondary {
+  color: var(--texto-suave) !important;
 }
 
-/* ---- 4. Gesto propio 2: el boton pastilla del club ---- */
-.btn-club {
-  background-color: var(--lima);
-  color: var(--verde-noche);
-  border: 2px solid var(--verde-noche);
+/* ---- 2. Gesto propio: la línea de cal en los títulos ---- */
+.titulo-cal {
+  border-left: 4px solid var(--lima);
+  padding-left: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ---- 3. Botones del club ---- */
+.btn-club,
+.btn-club-linea {
   border-radius: 999px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  padding: 0.5rem 1.5rem;
+  letter-spacing: 0.06em;
+  padding: 0.55rem 1.5rem;
+  transition: all 0.15s ease;
+}
+
+.btn-club {
+  background-color: var(--lima);
+  color: var(--verde-noche);
+  border: 2px solid var(--lima);
 }
 
 .btn-club:hover,
 .btn-club:focus {
   background-color: var(--verde-noche);
   color: var(--lima);
-  border-color: var(--lima);
+  border-color: var(--verde-noche);
 }
 
-/* El mismo boton pero vacio, para la accion secundaria */
 .btn-club-linea {
   background-color: transparent;
   color: var(--verde-noche);
-  border: 2px solid var(--verde-noche);
-  border-radius: 999px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  padding: 0.5rem 1.5rem;
+  border: 2px solid var(--linea);
 }
 
 .btn-club-linea:hover {
   background-color: var(--verde-noche);
   color: var(--cal);
+  border-color: var(--verde-noche);
 }
 
-/* ---- 5. Navbar ---- */
+/* ---- 4. Navbar ---- */
 .navbar-club {
   background-color: var(--verde-noche);
-  border-bottom: 4px solid var(--lima);
+  border-bottom: 3px solid var(--lima);
 }
 
 .navbar-club .navbar-brand {
   color: var(--lima);
-  font-size: 1.7rem;
+  font-size: 1.6rem;
   letter-spacing: 1px;
 }
 
@@ -90,35 +114,97 @@ h1, h2 {
   color: var(--cal);
   text-transform: uppercase;
   letter-spacing: 1px;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 500;
+  padding-inline: 0.9rem;
 }
 
 .navbar-club .nav-link:hover {
   color: var(--lima);
 }
 
-/* La pagina en la que estamos parados lleva la clase active */
 .navbar-club .nav-link.active {
   color: var(--lima);
   border-bottom: 3px solid var(--lima);
 }
 
-/* ---- 6. Hero (el bloque grande de arriba de cada pagina) ---- */
+/* ---- 5. Hero ---- */
 .hero-club {
-  background-color: var(--verde-cancha);
+  background: linear-gradient(
+    135deg,
+    var(--verde-noche) 0%,
+    var(--verde-bosque) 55%,
+    var(--verde-cancha) 100%
+  );
   color: var(--cal);
-  padding: 4rem 0;
+  padding: 5.5rem 0;
+  border-bottom: 3px solid var(--lima);
 }
 
 .hero-club h1 {
   color: #FFFFFF;
+  margin-bottom: 1rem;
 }
 
-/* ---- 7. Footer ---- */
+.hero-club .lead {
+  color: rgba(246, 248, 244, 0.85);
+  max-width: 44rem;
+}
+
+/* ---- 6. Tarjetas ---- */
+.card {
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  background: var(--blanco);
+}
+
+.card-inicio {
+  border-top: 3px solid var(--lima);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card-inicio:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(7, 33, 27, 0.06), 0 16px 32px rgba(7, 33, 27, 0.1);
+}
+
+/* ---- 7. Listas ---- */
+.list-group-item {
+  border-color: var(--linea);
+  padding: 0.9rem 1.1rem;
+}
+
+.list-group-item:first-child {
+  border-top-left-radius: var(--radio);
+  border-top-right-radius: var(--radio);
+}
+
+.list-group-item:last-child {
+  border-bottom-left-radius: var(--radio);
+  border-bottom-right-radius: var(--radio);
+}
+
+/* ---- 8. Chips de estado de una reserva ---- */
+.chip-estado {
+  display: inline-block;
+  margin-left: 0.5rem;
+  border-radius: 999px;
+  padding: 0.2rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.chip-confirmada { background: var(--ok-bg);    color: var(--ok); }
+.chip-en-curso   { background: var(--curso-bg); color: var(--curso); }
+.chip-cancelada  { background: var(--no-bg);    color: var(--no); }
+
+/* ---- 9. Footer ---- */
 .pie-club {
   background-color: var(--verde-noche);
-  border-top: 4px solid var(--lima);
+  border-top: 3px solid var(--lima);
   color: var(--cal);
   padding: 3rem 0 1.5rem;
 }
@@ -126,38 +212,9 @@ h1, h2 {
 .pie-club a {
   color: var(--lima);
   text-decoration: none;
+  overflow-wrap: anywhere;
 }
 
 .pie-club a:hover {
   text-decoration: underline;
-}
-
-/* ---- 8. Chips de estado del turno ---- */
-.chip-estado {
-  display: inline-block;
-  border-radius: 999px;
-  padding: 0.25rem 0.75rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.chip-libre {
-  background: #DCF3E3;
-  color: #14603A;
-}
-
-.chip-pendiente {
-  background: #FDF0D2;
-  color: #8A5B08;
-}
-
-.chip-ocupado {
-  background: #FBE2DC;
-  color: #9A3221;
-}
-
-.pie-club a {
-  overflow-wrap: anywhere;
 }
