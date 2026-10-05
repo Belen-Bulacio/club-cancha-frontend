@@ -1,3 +1,4 @@
+import logo from "../assets/logo-club.png";
 import { NavLink } from "react-router-dom";
 
 function Navbar() {
@@ -9,9 +10,9 @@ function Navbar() {
             className="navbar-brand d-flex align-items-center gap-2"
             to="/"
           >
+            <img src={logo} alt="" width="40" height="40" />
             <span>Club Cancha</span>
           </NavLink>
-
           <button
             className="navbar-toggler"
             type="button"

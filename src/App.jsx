@@ -20,14 +20,34 @@ function EnConstruccion({ titulo }) {
 function App() {
   const [reservas, setReservas] = useState(reservasIniciales);
 
+  function cancelarReserva(id) {
+    setReservas(
+      reservas.map(function (reserva) {
+        if (reserva.id === id) {
+          return { ...reserva, estado: "cancelada" };
+        }
+        return reserva;
+      }),
+    );
+  }
+
   return (
     <>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Inicio reservas={reservas} />} />
+        <Route
+          path="/"
+          element={<Inicio reservas={reservas} cancelar={cancelarReserva} />}
+        />
         <Route path="/canchas" element={<EnConstruccion titulo="Canchas" />} />
-        <Route path="/horarios" element={<EnConstruccion titulo="Horarios" />} />
-        <Route path="/reservar" element={<EnConstruccion titulo="Cargar reserva" />} />
+        <Route
+          path="/horarios"
+          element={<EnConstruccion titulo="Horarios" />}
+        />
+        <Route
+          path="/reservar"
+          element={<EnConstruccion titulo="Cargar reserva" />}
+        />
         <Route path="/clientes" element={<Clientes reservas={reservas} />} />
         <Route path="*" element={<Error404 />} />
       </Routes>
