@@ -1,4 +1,4 @@
-```jsx
+
 import { useEffect, useState } from "react";
 
 function Horarios() {
@@ -296,4 +296,3 @@ function Horarios() {
 }
 
 export default Horarios;
-```
