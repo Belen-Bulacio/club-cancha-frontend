@@ -1,60 +1,61 @@
-import { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import Rutas from "./components/routes/Rutas";
 import { reservasIniciales } from "./data/datosIniciales";
-import Clientes from "./pages/Clientes";
-import Inicio from "./pages/Inicio";
-import Error404 from "./pages/Error404";
 import "./App.css";
 
-function EnConstruccion({ titulo }) {
-  return (
-    <main className="container py-5">
-      <h1 className="titulo-cal">{titulo}</h1>
-      <p className="text-secondary">Esta sección está en desarrollo.</p>
-    </main>
-  );
-}
+const App = () => {
+  const guardadas = localStorage.getItem("reservas");
+  const inicial = guardadas ? JSON.parse(guardadas) : reservasIniciales;
 
-function App() {
-  const [reservas, setReservas] = useState(reservasIniciales);
+  const [reservas, setReservas] = useState(inicial);
 
-  function cancelarReserva(id) {
+  useEffect(() => {
+    localStorage.setItem("reservas", JSON.stringify(reservas));
+  }, [reservas]);
+
+  // CREATE
+  const agregarReserva = (nueva) => {
+    const reserva = { ...nueva, id: Date.now(), estado: "reservada" };
+    setReservas([...reservas, reserva]);
+  };
+
+  // UPDATE
+  const editarReserva = (id, cambios) => {
     setReservas(
-      reservas.map(function (reserva) {
+      reservas.map((reserva) => {
         if (reserva.id === id) {
-          return { ...reserva, estado: "cancelada" };
+          return { ...reserva, ...cambios };
         }
         return reserva;
       }),
     );
-  }
+  };
+
+  // UPDATE (caso especial: cancelar)
+  const cancelarReserva = (id) => {
+    editarReserva(id, { estado: "cancelada" });
+  };
+
+  // DELETE
+  const borrarReserva = (id) => {
+    setReservas(reservas.filter((reserva) => reserva.id !== id));
+  };
 
   return (
     <>
       <Navbar />
-      <Routes>
-        <Route
-          path="/"
-          element={<Inicio reservas={reservas} cancelar={cancelarReserva} />}
-        />
-        <Route path="/canchas" element={<EnConstruccion titulo="Canchas" />} />
-        <Route
-          path="/horarios"
-          element={<EnConstruccion titulo="Horarios" />}
-        />
-        <Route
-          path="/reservar"
-          element={<EnConstruccion titulo="Cargar reserva" />}
-        />
-        <Route path="/clientes" element={<Clientes reservas={reservas} />} />
-        <Route path="*" element={<Error404 />} />
-      </Routes>
-
+      <Rutas
+        reservas={reservas}
+        agregar={agregarReserva}
+        editar={editarReserva}
+        cancelar={cancelarReserva}
+        borrar={borrarReserva}
+      />
       <Footer />
     </>
   );
-}
+};
 
 export default App;

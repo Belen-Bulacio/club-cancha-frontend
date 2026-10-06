@@ -1,86 +1,304 @@
-import TarjetaDatos from "../components/TarjetaDatos";
+import { useState } from "react";
+import { Container,Row,Col,Card,Table,Badge,Button,Modal,Form,} from "react-bootstrap";
+import Swal from "sweetalert2";
+import Hero from "../components/Hero";
+import { canchas, horarios, duracionesPorTipo } from "../data/datosIniciales";
+import {fechaDeHoy,formatearFecha,estadoReal,colorDelEstado,calcularPrecio,senaMinima,formatearPrecio,} from "../data/funciones";
 
-function Inicio({ reservas = [], cancelar }) {
-  const hoy = new Date().toISOString().slice(0, 10);
+const Inicio = ({ reservas = [], editar, cancelar, borrar }) => {
+  const hoy = fechaDeHoy();
 
-  const reservasDeHoy = reservas.filter(function (reserva) {
-    return reserva.fecha === hoy;
+  const [editando, setEditando] = useState(null);
+  const [formulario, setFormulario] = useState({
+    cliente: "",
+    telefono: "",
+    hora: "",
+    duracion: 1,
+    sena: 0,
   });
 
-  const confirmadas = reservasDeHoy.filter(function (reserva) {
-    return reserva.estado === "confirmada";
-  });
+  const reservasDeHoy = reservas.filter((reserva) => reserva.fecha === hoy);
 
-  const enCurso = reservasDeHoy.filter(function (reserva) {
-    return reserva.estado === "en curso";
-  });
+  const contar = (estado) => {
+    return reservasDeHoy.filter((reserva) => estadoReal(reserva) === estado)
+      .length;
+  };
 
-  const canceladas = reservasDeHoy.filter(function (reserva) {
-    return reserva.estado === "cancelada";
-  });
+  const nombreDeCancha = (canchaId) => {
+    const cancha = canchas.find((unaCancha) => unaCancha.id === canchaId);
+    return cancha ? cancha.nombre : "—";
+  };
+
+  const tipoDeCancha = (canchaId) => {
+    const cancha = canchas.find((unaCancha) => unaCancha.id === canchaId);
+    return cancha ? cancha.tipo : "";
+  };
+
+  const abrirEdicion = (reserva) => {
+    setEditando(reserva);
+    setFormulario({
+      cliente: reserva.cliente,
+      telefono: reserva.telefono,
+      hora: reserva.hora,
+      duracion: reserva.duracion,
+      sena: reserva.sena,
+    });
+  };
+
+  const guardarEdicion = () => {
+    editar(editando.id, {
+      cliente: formulario.cliente,
+      telefono: formulario.telefono,
+      hora: formulario.hora,
+      duracion: Number(formulario.duracion),
+      sena: Number(formulario.sena),
+    });
+    setEditando(null);
+  };
+
+  const pedirBorrado = (reserva) => {
+    Swal.fire({
+      title: "¿Borrar la reserva?",
+      text: reserva.cliente + " · " + reserva.hora,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, borrar",
+      cancelButtonText: "No",
+    }).then((resultado) => {
+      if (resultado.isConfirmed) {
+        borrar(reserva.id);
+        Swal.fire("Borrada", "La reserva se eliminó del sistema.", "success");
+      }
+    });
+  };
+
+  const precioEditado = editando
+    ? calcularPrecio(
+        tipoDeCancha(editando.canchaId),
+        Number(formulario.duracion),
+        formulario.hora,
+      )
+    : 0;
 
   return (
-    <main>
-      <section className="hero-club">
-        <div className="container">
-          <h1>Sistema de Gestión de Turnos</h1>
-          <p className="lead">
-            Herramienta de uso interno para la administración del club.
-          </p>
-        </div>
-      </section>
+    <>
+      <Hero
+        titulo="Sistema de Gestión de Turnos"
+        texto="Herramienta de uso interno para la administración del club."
+      />
 
-      <section className="container py-5">
+      <Container className="py-5">
         <h2 className="titulo-cal">Hoy</h2>
+        <p className="text-secondary text-capitalize mb-4">
+          {formatearFecha(hoy)}
+        </p>
 
-        <div className="row g-3 mb-4">
-          <TarjetaDatos numero={confirmadas.length} texto="Confirmadas" />
-          <TarjetaDatos numero={enCurso.length} texto="En curso" />
-          <TarjetaDatos numero={canceladas.length} texto="Canceladas" />
-        </div>
+        <Row className="g-3 mb-4">
+          <Col xs={12} md={3}>
+            <Card className="text-center h-100 shadow-sm">
+              <Card.Body>
+                <p className="display-6 fw-bold mb-0">{contar("reservada")}</p>
+                <p className="text-secondary mb-0">Reservadas</p>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col xs={12} md={3}>
+            <Card className="text-center h-100 shadow-sm">
+              <Card.Body>
+                <p className="display-6 fw-bold mb-0">{contar("en curso")}</p>
+                <p className="text-secondary mb-0">En curso</p>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col xs={12} md={3}>
+            <Card className="text-center h-100 shadow-sm">
+              <Card.Body>
+                <p className="display-6 fw-bold mb-0">{contar("finalizada")}</p>
+                <p className="text-secondary mb-0">Finalizadas</p>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col xs={12} md={3}>
+            <Card className="text-center h-100 shadow-sm">
+              <Card.Body>
+                <p className="display-6 fw-bold mb-0">{contar("cancelada")}</p>
+                <p className="text-secondary mb-0">Canceladas</p>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
 
         <h3 className="h5">Reservas de hoy</h3>
 
-        {reservasDeHoy.length === 0 && (
+        {reservasDeHoy.length === 0 ? (
           <p className="text-secondary">No hay reservas cargadas para hoy.</p>
-        )}
+        ) : (
+          <Table responsive hover className="align-middle bg-white">
+            <thead>
+              <tr>
+                <th>Hora</th>
+                <th>Cliente</th>
+                <th>Cancha</th>
+                <th>Duración</th>
+                <th>Precio</th>
+                <th>Seña</th>
+                <th>Estado</th>
+                <th className="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reservasDeHoy.map((reserva) => {
+                const estado = estadoReal(reserva);
+                const precio = calcularPrecio(
+                  tipoDeCancha(reserva.canchaId),
+                  reserva.duracion,
+                  reserva.hora,
+                );
 
-        <ul className="list-group">
-          {reservasDeHoy.map(function (reserva) {
-            return (
-              <li
-                className="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2"
-                key={reserva.id}
-              >
-                <span>
-                  {reserva.hora} · {reserva.cliente}
-                  <span
-                    className={
-                      "chip-estado chip-" + reserva.estado.replace(" ", "-")
+                return (
+                  <tr key={reserva.id}>
+                    <td>{reserva.hora}</td>
+                    <td>{reserva.cliente}</td>
+                    <td>{nombreDeCancha(reserva.canchaId)}</td>
+                    <td>{reserva.duracion} h</td>
+                    <td>{formatearPrecio(precio)}</td>
+                    <td>{formatearPrecio(reserva.sena)}</td>
+                    <td>
+                      <Badge bg={colorDelEstado[estado]}>{estado}</Badge>
+                    </td>
+                    <td className="text-end text-nowrap">
+                      <Button
+                        size="sm"
+                        variant="outline-primary"
+                        className="me-1"
+                        onClick={() => abrirEdicion(reserva)}
+                      >
+                        Editar
+                      </Button>
+
+                      {estado === "reservada" && (
+                        <Button
+                          size="sm"
+                          variant="outline-warning"
+                          className="me-1"
+                          onClick={() => cancelar(reserva.id)}
+                        >
+                          Cancelar
+                        </Button>
+                      )}
+
+                      <Button
+                        size="sm"
+                        variant="outline-danger"
+                        onClick={() => pedirBorrado(reserva)}
+                      >
+                        Borrar
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </Table>
+        )}
+      </Container>
+
+      <Modal show={editando !== null} onHide={() => setEditando(null)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Editar reserva</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Cliente</Form.Label>
+              <Form.Control
+                value={formulario.cliente}
+                onChange={(e) =>
+                  setFormulario({ ...formulario, cliente: e.target.value })
+                }
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Teléfono</Form.Label>
+              <Form.Control
+                value={formulario.telefono}
+                onChange={(e) =>
+                  setFormulario({ ...formulario, telefono: e.target.value })
+                }
+              />
+            </Form.Group>
+
+            <Row>
+              <Col xs={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Hora</Form.Label>
+                  <Form.Select
+                    value={formulario.hora}
+                    onChange={(e) =>
+                      setFormulario({ ...formulario, hora: e.target.value })
                     }
                   >
-                    {reserva.estado}
-                  </span>
-                </span>
+                    {horarios.map((hora) => (
+                      <option value={hora} key={hora}>
+                        {hora}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              </Col>
 
-                {reserva.estado === "confirmada" && (
-                  <button
-                    type="button"
-                    className="btn btn-club-linea btn-sm"
-                    onClick={function () {
-                      cancelar(reserva.id);
-                    }}
+              <Col xs={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Duración</Form.Label>
+                  <Form.Select
+                    value={formulario.duracion}
+                    onChange={(e) =>
+                      setFormulario({ ...formulario, duracion: e.target.value })
+                    }
                   >
-                    Cancelar
-                  </button>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-    </main>
+                    {editando &&
+                      duracionesPorTipo[tipoDeCancha(editando.canchaId)].map(
+                        (d) => (
+                          <option value={d} key={d}>
+                            {d} h
+                          </option>
+                        ),
+                      )}
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Form.Group>
+              <Form.Label>
+                Seña — el turno sale {formatearPrecio(precioEditado)}, mínimo{" "}
+                {formatearPrecio(senaMinima(precioEditado))}
+              </Form.Label>
+              <Form.Control
+                type="number"
+                min={senaMinima(precioEditado)}
+                value={formulario.sena}
+                onChange={(e) =>
+                  setFormulario({ ...formulario, sena: e.target.value })
+                }
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setEditando(null)}>
+            Cancelar
+          </Button>
+          <Button className="btn-club" onClick={guardarEdicion}>
+            Guardar cambios
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
   );
-}
+};
 
 export default Inicio;

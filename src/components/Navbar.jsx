@@ -1,65 +1,39 @@
-import logo from "../assets/logo-club.png";
-import { NavLink } from "react-router-dom";
+import { Navbar, Nav, Container, Image, Button } from "react-bootstrap";
+import { Link, NavLink } from "react-router-dom";
 
-function Navbar() {
+const NavigationBar = () => {
   return (
-    <header className="sticky-top">
-      <nav className="navbar navbar-expand-lg navbar-club" data-bs-theme="dark">
-        <div className="container">
-          <NavLink
-            className="navbar-brand d-flex align-items-center gap-2"
-            to="/"
-          >
-            <img src={logo} alt="" width="40" height="40" />
-            <span>Club Cancha</span>
-          </NavLink>
-          <button
-            className="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#menuPrincipal"
-            aria-controls="menuPrincipal"
-            aria-expanded="false"
-            aria-label="Abrir el menu"
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
+    <Navbar expand="lg" className="navbar-club py-2" variant="dark" sticky="top">
+      <Container>
+        <Navbar.Brand as={Link} to="/" className="d-flex align-items-center gap-2">
+          <Image src="/logo-club.png" alt="Club Cancha" style={{ height: "40px", width: "auto" }}/>
+        </Navbar.Brand>
+        
+        <Navbar.Toggle aria-controls="menu-principal" />
 
-          <div className="collapse navbar-collapse" id="menuPrincipal">
-            <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/">
-                  Inicio
-                </NavLink>
-              </li>
+        <Navbar.Collapse id="menu-principal">
+          <Nav className="ms-auto align-items-lg-center gap-lg-2">
+            <Nav.Link as={NavLink} to="/" end>
+              Inicio
+            </Nav.Link>
+            <Nav.Link as={NavLink} to="/canchas">
+              Canchas
+            </Nav.Link>
+            <Nav.Link as={NavLink} to="/horarios">
+              Horarios
+            </Nav.Link>
+            <Nav.Link as={NavLink} to="/clientes">
+              Clientes
+            </Nav.Link>
 
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/canchas">
-                  Canchas
-                </NavLink>
-              </li>
-
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/horarios">
-                  Horarios
-                </NavLink>
-              </li>
-
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/clientes">
-                  Clientes
-                </NavLink>
-              </li>
-            </ul>
-
-            <NavLink className="btn btn-club ms-lg-3" to="/reservar">
+            <Button as={Link} to="/reservar" className="btn-club ms-lg-3">
               Cargar reserva
-            </NavLink>
-          </div>
-        </div>
-      </nav>
-    </header>
+            </Button>
+          </Nav>
+        </Navbar.Collapse>
+      </Container>
+    </Navbar>
   );
-}
+};
 
-export default Navbar;
+export default NavigationBar;
