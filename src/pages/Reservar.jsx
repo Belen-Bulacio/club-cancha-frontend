@@ -1,432 +1,198 @@
-import { useState } from 'react'
+import { useState } from "react";
+import { Container, Form, Row, Col, Button, Modal, Alert } from "react-bootstrap";
+import { useSearchParams } from "react-router-dom";
+import Hero from "../components/Hero";
+import { canchas, horarios, duracionesPorTipo } from "../data/datosIniciales";
 import {
-  Container,
-  Row,
-  Col,
-  Card,
-  Form,
-  Button,
-  Alert
-} from 'react-bootstrap'
-import '../styles/reservar.css'
+  estadoDelTurno, fechaDeHoy, calcularPrecio, senaMinima, formatearPrecio,
+} from "../data/funciones";
 
-// Datos de los recordatorios
-const recordatorios = [
-  {
-    numero: 1,
-    titulo: 'Verificá la cancha',
-    texto: 'Seleccioná el deporte y la cancha que se quiere reservar.'
-  },
-  {
-    numero: 2,
-    titulo: 'Verificá fecha y hora con el cliente',
-    texto: 'Comprobá que la fecha y el horario sean los correctos.'
-  },
-  {
-    numero: 3,
-    titulo: 'Cargá la reserva',
-    texto: 'Aceptá la política de cancelación y confirmá el turno.'
-  }
-]
+const Reservar = ({ reservas = [], agregar }) => {
+  // Si venimos desde Canchas u Horarios, llegan la cancha, la hora y el día
+  const [parametros] = useSearchParams();
 
-// Componente reutilizable para cada recordatorio
-function Recordatorio({ numero, titulo, texto }) {
-  return (
-    <div className="d-flex gap-3 mb-4">
-      <span className="paso-numero">{numero}</span>
+  const [apellido, setApellido] = useState("");
+  const [nombre, setNombre] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [tipo, setTipo] = useState("");
+  const [canchaId, setCanchaId] = useState(parametros.get("cancha") || "");
+  const [fecha, setFecha] = useState(parametros.get("fecha") || fechaDeHoy());
+  const [hora, setHora] = useState(parametros.get("hora") || "");
+  const [duracion, setDuracion] = useState(1);
+  const [sena, setSena] = useState("");
+  const [politica, setPolitica] = useState(false);
 
-      <div>
-        <h3 className="h5 mb-1">{titulo}</h3>
-        <p className="mb-0 text-muted">{texto}</p>
-      </div>
-    </div>
-  )
-}
+  // null = sin modal, "ok" = se guardó, un texto = el error a mostrar
+  const [modal, setModal] = useState(null);
 
-function Reservar() {
-  const [formulario, setFormulario] = useState({
-    nombre: '',
-    apellido: '',
-    telefono: '',
-    email: '',
-    deporte: '',
-    cancha: '',
-    fecha: '',
-    hora: '',
-    observaciones: '',
-    politica: false
-  })
+  const canchaElegida = canchas.find((c) => c.id === Number(canchaId));
+  const tipoElegido = canchaElegida ? canchaElegida.tipo : tipo;
 
-  const [mensaje, setMensaje] = useState('')
-  const [tipoMensaje, setTipoMensaje] = useState('')
+  const duraciones = tipoElegido ? duracionesPorTipo[tipoElegido] : [1];
+  const precio = calcularPrecio(tipoElegido, Number(duracion), hora);
+  const minimo = senaMinima(precio);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target
+  const canchasDelTipo = canchas.filter((cancha) => cancha.tipo === tipo);
 
-    setFormulario({
-      ...formulario,
-      [name]: type === 'checkbox' ? checked : value
-    })
-  }
+  const horasLibres = horarios.filter((unaHora) => {
+    return estadoDelTurno(reservas, Number(canchaId), fecha, unaHora) === "libre";
+  });
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
+  const guardar = (evento) => {
+    evento.preventDefault();
 
-    if (!formulario.politica) {
-      setMensaje(
-        'Marcá que el cliente fue informado de la política de cancelación.'
-      )
-      setTipoMensaje('danger')
-      return
+    if (!apellido || !nombre || !telefono || !canchaId || !fecha || !hora) {
+      setModal("Faltan datos obligatorios. La reserva no se guardó.");
+      return;
+    }
+    if (!politica) {
+      setModal("Tenés que confirmar que el cliente fue informado de la política de cancelación.");
+      return;
+    }
+    if (Number(sena) < minimo) {
+      setModal("La seña no puede ser menor a " + formatearPrecio(minimo) + ".");
+      return;
     }
 
-    setMensaje('Reserva guardada correctamente.')
-    setTipoMensaje('success')
-  }
+    agregar({
+      canchaId: Number(canchaId),
+      fecha: fecha,
+      hora: hora,
+      duracion: Number(duracion),
+      cliente: apellido + ", " + nombre,
+      telefono: telefono,
+      sena: Number(sena),
+      politica: true,
+    });
+
+    setModal("ok");
+
+    setApellido(""); setNombre(""); setTelefono("");
+    setTipo(""); setCanchaId(""); setHora("");
+    setDuracion(1); setSena(""); setPolitica(false);
+  };
 
   return (
-    <main>
-      {/* HERO */}
-      <section className="hero-club">
-        <Container className="py-5">
-          <h1>Registrar una Reserva</h1>
+    <>
+      <Hero titulo="Cargar reserva" texto="Completá los datos del cliente y del turno." />
 
-          <p className="lead mb-0">
-            Cargá los datos del cliente y del turno. Los campos con *
-            son obligatorios.
-          </p>
-        </Container>
-      </section>
+      <Container className="py-5">
+        <h2 className="titulo-cal">Nueva reserva</h2>
 
-      {/* FORMULARIO */}
-      <section className="py-5">
-        <Container>
-          <Row className="g-4">
-
-            {/* COLUMNA DEL FORMULARIO */}
-            <Col xs={12} lg={8}>
-              <Card className="shadow-sm border-0">
-                <Card.Body className="p-4">
-
-                  <h2 className="titulo-cal mb-4">
-                    Datos de la reserva
-                  </h2>
-
-                  <Form onSubmit={handleSubmit}>
-
-                    {/* PASO 1 */}
-                    <div className="mb-5">
-
-                      <div className="d-flex align-items-center gap-3 mb-4">
-                        <span className="paso-numero">1</span>
-
-                        <h3 className="h4 mb-0">
-                          Datos del cliente
-                        </h3>
-                      </div>
-
-                      <Row className="g-3">
-
-                        {/* NOMBRE */}
-                        <Col md={6}>
-                          <Form.Group controlId="nombre">
-                            <Form.Label>
-                              Nombre <span className="obligatorio">*</span>
-                            </Form.Label>
-
-                            <Form.Control
-                              type="text"
-                              name="nombre"
-                              value={formulario.nombre}
-                              onChange={handleChange}
-                              placeholder="Ingresá el nombre"
-                              required
-                            />
-                          </Form.Group>
-                        </Col>
-
-                        {/* APELLIDO */}
-                        <Col md={6}>
-                          <Form.Group controlId="apellido">
-                            <Form.Label>
-                              Apellido <span className="obligatorio">*</span>
-                            </Form.Label>
-
-                            <Form.Control
-                              type="text"
-                              name="apellido"
-                              value={formulario.apellido}
-                              onChange={handleChange}
-                              placeholder="Ingresá el apellido"
-                              required
-                            />
-                          </Form.Group>
-                        </Col>
-
-                        {/* TELÉFONO */}
-                        <Col md={6}>
-                          <Form.Group controlId="telefono">
-                            <Form.Label>
-                              Teléfono <span className="obligatorio">*</span>
-                            </Form.Label>
-
-                            <Form.Control
-                              type="tel"
-                              name="telefono"
-                              value={formulario.telefono}
-                              onChange={handleChange}
-                              placeholder="Ej: 3815555555"
-                              required
-                            />
-                          </Form.Group>
-                        </Col>
-
-                        {/* EMAIL */}
-                        <Col md={6}>
-                          <Form.Group controlId="email">
-                            <Form.Label>
-                              Email <span className="obligatorio">*</span>
-                            </Form.Label>
-
-                            <Form.Control
-                              type="email"
-                              name="email"
-                              value={formulario.email}
-                              onChange={handleChange}
-                              placeholder="cliente@email.com"
-                              required
-                            />
-                          </Form.Group>
-                        </Col>
-
-                      </Row>
-                    </div>
-
-                    {/* PASO 2 */}
-                    <div className="mb-5">
-
-                      <div className="d-flex align-items-center gap-3 mb-4">
-                        <span className="paso-numero">2</span>
-
-                        <h3 className="h4 mb-0">
-                          Datos del turno
-                        </h3>
-                      </div>
-
-                      <Row className="g-3">
-
-                        {/* DEPORTE */}
-                        <Col md={6}>
-                          <Form.Group controlId="deporte">
-                            <Form.Label>
-                              Deporte <span className="obligatorio">*</span>
-                            </Form.Label>
-
-                            <Form.Select
-                              name="deporte"
-                              value={formulario.deporte}
-                              onChange={handleChange}
-                              required
-                            >
-                              <option value="">
-                                Seleccioná un deporte
-                              </option>
-
-                              <option value="Fútbol">
-                                Fútbol
-                              </option>
-
-                              <option value="Pádel">
-                                Pádel
-                              </option>
-
-                              <option value="Vóley">
-                                Vóley
-                              </option>
-                            </Form.Select>
-                          </Form.Group>
-                        </Col>
-
-                        {/* CANCHA */}
-                        <Col md={6}>
-                          <Form.Group controlId="cancha">
-                            <Form.Label>
-                              Cancha <span className="obligatorio">*</span>
-                            </Form.Label>
-
-                            <Form.Select
-                              name="cancha"
-                              value={formulario.cancha}
-                              onChange={handleChange}
-                              required
-                            >
-                              <option value="">
-                                Seleccioná una cancha
-                              </option>
-
-                              <option value="Cancha 1">
-                                Cancha 1
-                              </option>
-
-                              <option value="Cancha 2">
-                                Cancha 2
-                              </option>
-
-                              <option value="Cancha 3">
-                                Cancha 3
-                              </option>
-                            </Form.Select>
-                          </Form.Group>
-                        </Col>
-
-                        {/* FECHA */}
-                        <Col md={6}>
-                          <Form.Group controlId="fecha">
-                            <Form.Label>
-                              Fecha <span className="obligatorio">*</span>
-                            </Form.Label>
-
-                            <Form.Control
-                              type="date"
-                              name="fecha"
-                              value={formulario.fecha}
-                              onChange={handleChange}
-                              required
-                            />
-                          </Form.Group>
-                        </Col>
-
-                        {/* HORA */}
-                        <Col md={6}>
-                          <Form.Group controlId="hora">
-                            <Form.Label>
-                              Hora <span className="obligatorio">*</span>
-                            </Form.Label>
-
-                            <Form.Select
-                              name="hora"
-                              value={formulario.hora}
-                              onChange={handleChange}
-                              required
-                            >
-                              <option value="">
-                                Seleccioná un horario
-                              </option>
-
-                              <option value="09:00">09:00</option>
-                              <option value="10:00">10:00</option>
-                              <option value="11:00">11:00</option>
-                              <option value="12:00">12:00</option>
-                              <option value="17:00">17:00</option>
-                              <option value="18:00">18:00</option>
-                              <option value="19:00">19:00</option>
-                              <option value="20:00">20:00</option>
-                              <option value="21:00">21:00</option>
-                            </Form.Select>
-                          </Form.Group>
-                        </Col>
-
-                        {/* OBSERVACIONES */}
-                        <Col xs={12}>
-                          <Form.Group controlId="observaciones">
-                            <Form.Label>
-                              Observaciones
-                            </Form.Label>
-
-                            <Form.Control
-                              as="textarea"
-                              rows={4}
-                              name="observaciones"
-                              value={formulario.observaciones}
-                              onChange={handleChange}
-                              placeholder="Agregá alguna observación si es necesario"
-                            />
-                          </Form.Group>
-                        </Col>
-
-                      </Row>
-                    </div>
-
-                    {/* PASO 3 */}
-                    <div className="mb-4">
-
-                      <div className="d-flex align-items-center gap-3 mb-4">
-                        <span className="paso-numero">3</span>
-
-                        <h3 className="h4 mb-0">
-                          Confirmación
-                        </h3>
-                      </div>
-
-                      <Form.Check
-                        type="checkbox"
-                        id="politica"
-                        name="politica"
-                        checked={formulario.politica}
-                        onChange={handleChange}
-                        label="El cliente fue informado sobre la política de cancelación."
-                      />
-                    </div>
-
-                    {/* MENSAJE */}
-                    {mensaje && (
-                      <Alert variant={tipoMensaje} className="mt-3">
-                        {mensaje}
-                      </Alert>
-                    )}
-
-                    {/* BOTÓN */}
-                    <div className="mt-4">
-                      <Button
-                        type="submit"
-                        className="btn-club"
-                      >
-                        Guardar reserva
-                      </Button>
-                    </div>
-
-                  </Form>
-                </Card.Body>
-              </Card>
+        <Form onSubmit={guardar} className="bg-white p-4 rounded shadow-sm">
+          <Row className="g-3">
+            <Col xs={12} md={6}>
+              <Form.Label>Apellido</Form.Label>
+              <Form.Control value={apellido} onChange={(e) => setApellido(e.target.value)} />
             </Col>
 
-            {/* COLUMNA DE RECORDATORIOS */}
-            <Col xs={12} lg={4}>
-              <aside className="sticky-top reserva-recordatorio">
-
-                <Card className="shadow-sm border-0">
-                  <Card.Body className="p-4">
-
-                    <h2 className="h4 titulo-cal mb-4">
-                      Recordatorios
-                    </h2>
-
-                    {/* map() + props */}
-                    {recordatorios.map((recordatorio) => (
-                      <Recordatorio
-                        key={recordatorio.numero}
-                        numero={recordatorio.numero}
-                        titulo={recordatorio.titulo}
-                        texto={recordatorio.texto}
-                      />
-                    ))}
-
-                    <Alert variant="light" className="mt-4 mb-0">
-                      <strong>Importante:</strong> verificá todos los datos
-                      antes de guardar la reserva.
-                    </Alert>
-
-                  </Card.Body>
-                </Card>
-
-              </aside>
+            <Col xs={12} md={6}>
+              <Form.Label>Nombre</Form.Label>
+              <Form.Control value={nombre} onChange={(e) => setNombre(e.target.value)} />
             </Col>
 
+            <Col xs={12} md={6}>
+              <Form.Label>Celular</Form.Label>
+              <Form.Control type="tel" value={telefono} onChange={(e) => setTelefono(e.target.value)} />
+            </Col>
+
+            <Col xs={12} md={3}>
+              <Form.Label>Deporte</Form.Label>
+              <Form.Select
+                value={tipo}
+                onChange={(e) => { setTipo(e.target.value); setCanchaId(""); setDuracion(1); }}
+              >
+                <option value="">Elegí</option>
+                <option value="Fútbol">Fútbol</option>
+                <option value="Pádel">Pádel</option>
+              </Form.Select>
+            </Col>
+
+            <Col xs={12} md={3}>
+              <Form.Label>Cancha</Form.Label>
+              <Form.Select value={canchaId} onChange={(e) => setCanchaId(e.target.value)}>
+                <option value="">Elegí</option>
+                {canchasDelTipo.map((cancha) => (
+                  <option value={cancha.id} key={cancha.id}>{cancha.nombre}</option>
+                ))}
+              </Form.Select>
+            </Col>
+
+            <Col xs={12} md={4}>
+              <Form.Label>Día</Form.Label>
+              <Form.Control
+                type="date"
+                value={fecha}
+                min={fechaDeHoy()}
+                onChange={(e) => setFecha(e.target.value)}
+              />
+            </Col>
+
+            <Col xs={12} md={4}>
+              <Form.Label>Hora de inicio</Form.Label>
+              <Form.Select value={hora} onChange={(e) => setHora(e.target.value)} disabled={!canchaId}>
+                <option value="">{canchaId ? "Elegí una hora" : "Elegí la cancha"}</option>
+                {horasLibres.map((unaHora) => (
+                  <option value={unaHora} key={unaHora}>{unaHora}</option>
+                ))}
+              </Form.Select>
+            </Col>
+
+            <Col xs={12} md={4}>
+              <Form.Label>Duración</Form.Label>
+              <Form.Select value={duracion} onChange={(e) => setDuracion(e.target.value)}>
+                {duraciones.map((unaDuracion) => (
+                  <option value={unaDuracion} key={unaDuracion}>{unaDuracion} h</option>
+                ))}
+              </Form.Select>
+            </Col>
+
+            <Col xs={12}>
+              <Alert variant="light" className="mb-0">
+                El turno sale <strong>{formatearPrecio(precio)}</strong> — seña mínima{" "}
+                <strong>{formatearPrecio(minimo)}</strong>
+              </Alert>
+            </Col>
+
+            <Col xs={12} md={6}>
+              <Form.Label>Seña recibida</Form.Label>
+              <Form.Control
+                type="number"
+                min={minimo}
+                value={sena}
+                onChange={(e) => setSena(e.target.value)}
+              />
+            </Col>
+
+            <Col xs={12}>
+              <Form.Check
+                type="checkbox"
+                checked={politica}
+                onChange={(e) => setPolitica(e.target.checked)}
+                label="El cliente fue informado de la política de cancelación"
+              />
+            </Col>
+
+            <Col xs={12}>
+              <Button type="submit" className="btn-club mt-3">Guardar reserva</Button>
+            </Col>
           </Row>
-        </Container>
-      </section>
-    </main>
-  )
-}
+        </Form>
+      </Container>
 
-export default Reservar
+      <Modal show={modal !== null} onHide={() => setModal(null)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>{modal === "ok" ? "Reserva generada" : "No se pudo guardar"}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {modal === "ok" ? "La reserva se generó con éxito." : modal}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button className="btn-club" onClick={() => setModal(null)}>Aceptar</Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+};
+
+export default Reservar;
