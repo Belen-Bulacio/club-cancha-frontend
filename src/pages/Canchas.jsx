@@ -1,178 +1,81 @@
-import { canchas, reservasIniciales } from '../data/datosIniciales'
+import { Container, Row, Col, Card, Badge, Button, Table } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import Hero from "../components/Hero";
+import { canchas, duracionesPorTipo } from "../data/datosIniciales";
+import {
+  estadoDelTurno, fechaDeHoy, colorDelEstado,
+  calcularPrecio, formatearPrecio, formatearFecha,
+} from "../data/funciones";
 
-function obtenerEstado(canchaId) {
-  const reserva = reservasIniciales.find(
-    (reserva) => reserva.canchaId === canchaId
-  )
+const Canchas = ({ reservas = [] }) => {
+  const hoy = fechaDeHoy();
+  const horaAhora = new Date().getHours();
+  const ahora = (horaAhora < 10 ? "0" + horaAhora : horaAhora) + ":00";
 
-  if (!reserva) {
-    return 'Libre'
-  }
-
-  if (reserva.estado === 'a confirmar') {
-    return 'Pendiente'
-  }
-
-  return 'Ocupada'
-}
-
-function CanchaCard({ cancha, estado }) {
-  let claseEstado = 'chip-libre'
-
-  if (estado === 'Pendiente') {
-    claseEstado = 'chip-pendiente'
-  }
-
-  if (estado === 'Ocupada') {
-    claseEstado = 'chip-ocupado'
-  }
-
-  return (
-    <div className="col-12 col-md-6 col-lg-4">
-      <div className="card h-100">
-        <div className="card-body">
-
-          <h3 className="card-title">
-            {cancha.nombre}
-          </h3>
-
-          <p className="card-text">
-            Deporte: {cancha.deporte}
-          </p>
-
-          <p className="precio">
-            ${cancha.tarifa} <span>/ hora</span>
-          </p>
-
-          <p>Vestuarios: Sí</p>
-
-          <p>Iluminación: Sí</p>
-
-          <p>
-            Estado:{' '}
-            <span className={`chip-estado ${claseEstado}`}>
-              {estado}
-            </span>
-          </p>
-
-          <button className="btn btn-club">
-            Cargar Reserva
-          </button>
-
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function Canchas() {
   return (
     <>
-      <main>
+      <Hero
+        titulo="Canchas del club"
+        texto="Estado actual de cada cancha y tarifas vigentes."
+      />
 
-        <section className="hero-club">
-          <div className="container">
-            <h1>Canchas del club</h1>
+      <Container className="py-5">
+        <h2 className="titulo-cal">Nuestras canchas</h2>
+        <p className="text-secondary text-capitalize mb-4">{formatearFecha(hoy)}</p>
 
-            <p>
-              Conocé nuestras canchas y sus tarifas.
-            </p>
-          </div>
-        </section>
+        <Row className="g-4">
+          {canchas.map((cancha) => {
+            const estado = estadoDelTurno(reservas, cancha.id, hoy, ahora);
+            const duraciones = duracionesPorTipo[cancha.tipo];
 
-        <section className="container py-5">
+            return (
+              <Col xs={12} md={6} lg={4} key={cancha.id}>
+                <Card className="h-100 shadow-sm">
+                  <Card.Body className="d-flex flex-column">
+                    <Card.Title>{cancha.nombre}</Card.Title>
+                    <Card.Subtitle className="mb-3 text-secondary">
+                      {cancha.deporte}
+                    </Card.Subtitle>
 
-          <div className="text-center mb-4">
-            <h2 className="titulo-cal">
-              Catálogo de canchas
-            </h2>
+                    <p className="mb-3">
+                      Ahora: <Badge bg={colorDelEstado[estado]}>{estado}</Badge>
+                    </p>
 
-            <p>
-              Tarifas vigentes por hora de juego.
-              Los turnos se cargan desde la sección Reservar.
-            </p>
-          </div>
+                    <Table size="sm" borderless className="mb-3">
+                      <thead>
+                        <tr>
+                          <th>Turno</th>
+                          <th>8 a 17 h</th>
+                          <th>17 a 00 h</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {duraciones.map((duracion) => (
+                          <tr key={duracion}>
+                            <td>{duracion} h</td>
+                            <td>{formatearPrecio(calcularPrecio(cancha.tipo, duracion, "10:00"))}</td>
+                            <td>{formatearPrecio(calcularPrecio(cancha.tipo, duracion, "19:00"))}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
 
-          <div className="row g-4">
-
-            {canchas.map((cancha) => (
-              <CanchaCard
-                key={cancha.id}
-                cancha={cancha}
-                estado={obtenerEstado(cancha.id)}
-              />
-            ))}
-
-          </div>
-
-        </section>
-
-        <section className="container pb-5">
-
-          <div className="text-center mb-4">
-            <h2>Servicios incluidos</h2>
-          </div>
-
-          <div className="row g-4">
-
-            <div className="col-12 col-md-6 col-lg-4">
-              <div className="card h-100">
-                <div className="card-body text-center">
-
-                  <h3 className="card-title">
-                    Vestuarios con duchas
-                  </h3>
-
-                  <p className="card-text">
-                    Vestuarios climatizados y lockers
-                    sin costo adicional.
-                  </p>
-
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-6 col-lg-4">
-              <div className="card h-100">
-                <div className="card-body text-center">
-
-                  <h3 className="card-title">
-                    Iluminación LED
-                  </h3>
-
-                  <p className="card-text">
-                    Todas las canchas se pueden usar
-                    hasta las 23 h.
-                  </p>
-
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-6 col-lg-4">
-              <div className="card h-100">
-                <div className="card-body text-center">
-
-                  <h3 className="card-title">
-                    Estacionamiento
-                  </h3>
-
-                  <p className="card-text">
-                    Playa de estacionamiento propia
-                    y gratuita para socios.
-                  </p>
-
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-        </section>
-
-      </main>
+                    <Button
+                      as={Link}
+                      to={"/reservar?cancha=" + cancha.id}
+                      className="btn-club mt-auto"
+                    >
+                      Cargar reserva
+                    </Button>
+                  </Card.Body>
+                </Card>
+              </Col>
+            );
+          })}
+        </Row>
+      </Container>
     </>
-  )
-}
+  );
+};
 
-export default Canchas
+export default Canchas;
