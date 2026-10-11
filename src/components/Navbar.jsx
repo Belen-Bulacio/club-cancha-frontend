@@ -1,53 +1,39 @@
-function Navbar() {
+import { Navbar, Nav, Container, Image, Button } from "react-bootstrap";
+import { Link, NavLink } from "react-router-dom";
+
+const NavigationBar = () => {
   return (
-    <header className="sticky-top">
-      <nav className="navbar navbar-expand-lg navbar-club" data-bs-theme="dark">
-        <div className="container">
+    <Navbar expand="lg" className="navbar-club py-2" variant="dark" sticky="top">
+      <Container>
+        <Navbar.Brand as={Link} to="/" className="d-flex align-items-center gap-2">
+          <Image src="/logo-club.png" alt="Club Cancha" style={{ height: "40px", width: "auto" }}/>
+        </Navbar.Brand>
+        
+        <Navbar.Toggle aria-controls="menu-principal" />
 
-          <a className="navbar-brand d-flex align-items-center gap-2" href="#">
-            <span>Club Cancha</span>
-          </a>
+        <Navbar.Collapse id="menu-principal">
+          <Nav className="ms-auto align-items-lg-center gap-lg-2">
+            <Nav.Link as={NavLink} to="/" end>
+              Inicio
+            </Nav.Link>
+            <Nav.Link as={NavLink} to="/canchas">
+              Canchas
+            </Nav.Link>
+            <Nav.Link as={NavLink} to="/horarios">
+              Horarios
+            </Nav.Link>
+            <Nav.Link as={NavLink} to="/clientes">
+              Clientes
+            </Nav.Link>
 
-          <button
-            className="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#menuPrincipal"
-            aria-controls="menuPrincipal"
-            aria-expanded="false"
-            aria-label="Abrir el menu"
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
+            <Button as={Link} to="/reservar" className="btn-club ms-lg-3">
+              Cargar reserva
+            </Button>
+          </Nav>
+        </Navbar.Collapse>
+      </Container>
+    </Navbar>
+  );
+};
 
-          <div className="collapse navbar-collapse" id="menuPrincipal">
-            <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
-              <li className="nav-item">
-                <a className="nav-link active" href="#">Inicio</a>
-              </li>
-
-              <li className="nav-item">
-                <a className="nav-link" href="#">Canchas</a>
-              </li>
-
-              <li className="nav-item">
-                <a className="nav-link" href="#">Horarios</a>
-              </li>
-
-              <li className="nav-item">
-                <a className="nav-link" href="#">Contacto</a>
-              </li>
-            </ul>
-
-            <a className="btn btn-club ms-lg-3 mt-2 mt-lg-0" href="#">
-              Cargar Reserva
-            </a>
-          </div>
-
-        </div>
-      </nav>
-    </header>
-  )
-}
-
-export default Navbar
+export default NavigationBar;
