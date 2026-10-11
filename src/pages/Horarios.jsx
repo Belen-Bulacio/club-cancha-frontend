@@ -1,298 +1,88 @@
+import { useState } from "react";
+import { Container, Table, Badge, Button, Form, Row, Col } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import Hero from "../components/Hero";
+import { canchas, horarios } from "../data/datosIniciales";
+import {
+  estadoDelTurno, fechaDeHoy, colorDelEstado, formatearFecha,
+} from "../data/funciones";
 
-import { useEffect, useState } from "react";
-
-function Horarios() {
-
-  // ============================
-  // 1. Fecha actual
-  // ============================
-
-  const [fechaActual, setFechaActual] = useState(new Date());
-
-  // ============================
-  // 2. Mostrar solo turnos libres
-  // ============================
-
-  const [soloLibres, setSoloLibres] = useState(false);
-
-  // ============================
-  // 3. Horario actual
-  // ============================
-
-  const [horaActual, setHoraActual] = useState("");
-
-  useEffect(() => {
-
-    const actualizarHora = () => {
-      const ahora = new Date();
-
-      let hora = ahora.getHours();
-
-      if (hora < 10) {
-        hora = "0" + hora;
-      }
-
-      setHoraActual(hora + ":00");
-      setFechaActual(ahora);
-    };
-
-    actualizarHora();
-
-    // Actualiza la hora cada minuto
-    const intervalo = setInterval(actualizarHora, 60000);
-
-    return () => clearInterval(intervalo);
-
-  }, []);
-
-  // ============================
-  // 4. Formato de fecha
-  // ============================
-
-  const formatoFecha = {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric"
-  };
-
-  const fechaFormateada = fechaActual.toLocaleDateString(
-    "es-AR",
-    formatoFecha
-  );
-
-  // ============================
-  // 5. Datos de las canchas
-  // ============================
-
-  const canchas = [
-    {
-      id: "f5",
-      nombre: "Fútbol 5",
-      numero: "Cancha 1",
-      turnos: [
-        { hora: "08:00", estado: "libre" },
-        { hora: "09:00", estado: "ocupado" },
-        { hora: "10:00", estado: "libre" },
-        { hora: "11:00", estado: "pendiente" },
-        { hora: "12:00", estado: "libre" },
-        { hora: "13:00", estado: "ocupado" },
-        { hora: "14:00", estado: "libre" },
-        { hora: "15:00", estado: "libre" },
-        { hora: "16:00", estado: "ocupado" },
-        { hora: "17:00", estado: "libre" },
-        { hora: "18:00", estado: "pendiente" },
-        { hora: "19:00", estado: "libre" },
-        { hora: "20:00", estado: "ocupado" },
-        { hora: "21:00", estado: "libre" },
-        { hora: "22:00", estado: "libre" }
-      ]
-    },
-
-    {
-      id: "f7",
-      nombre: "Fútbol 7",
-      numero: "Cancha 2",
-      turnos: [
-        { hora: "08:00", estado: "libre" },
-        { hora: "09:00", estado: "libre" },
-        { hora: "10:00", estado: "ocupado" },
-        { hora: "11:00", estado: "libre" },
-        { hora: "12:00", estado: "pendiente" },
-        { hora: "13:00", estado: "libre" },
-        { hora: "14:00", estado: "ocupado" },
-        { hora: "15:00", estado: "libre" },
-        { hora: "16:00", estado: "libre" },
-        { hora: "17:00", estado: "ocupado" },
-        { hora: "18:00", estado: "libre" },
-        { hora: "19:00", estado: "pendiente" },
-        { hora: "20:00", estado: "libre" },
-        { hora: "21:00", estado: "ocupado" },
-        { hora: "22:00", estado: "libre" }
-      ]
-    },
-
-    {
-      id: "padel",
-      nombre: "Pádel",
-      numero: "Cancha 3",
-      turnos: [
-        { hora: "08:00", estado: "ocupado" },
-        { hora: "09:00", estado: "libre" },
-        { hora: "10:00", estado: "libre" },
-        { hora: "11:00", estado: "ocupado" },
-        { hora: "12:00", estado: "libre" },
-        { hora: "13:00", estado: "pendiente" },
-        { hora: "14:00", estado: "libre" },
-        { hora: "15:00", estado: "ocupado" },
-        { hora: "16:00", estado: "libre" },
-        { hora: "17:00", estado: "libre" },
-        { hora: "18:00", estado: "ocupado" },
-        { hora: "19:00", estado: "libre" },
-        { hora: "20:00", estado: "pendiente" },
-        { hora: "21:00", estado: "libre" },
-        { hora: "22:00", estado: "ocupado" }
-      ]
-    }
-  ];
-
-  // ============================
-  // 6. Cantidad de turnos libres
-  // ============================
-
-  const contarLibres = (turnos) => {
-    return turnos.filter(
-      (turno) => turno.estado === "libre"
-    ).length;
-  };
-
-  // ============================
-  // 7. Renderizado
-  // ============================
+const Horarios = ({ reservas = [] }) => {
+  // Permite mirar la grilla de otro día, no solo la de hoy
+  const [fecha, setFecha] = useState(fechaDeHoy());
 
   return (
-    <main className="container py-4">
+    <>
+      <Hero
+        titulo="Horarios y disponibilidad"
+        texto="Grilla de turnos por cancha. El club abre de 8 a 00 h."
+      />
 
-      {/* HERO */}
+      <Container className="py-5">
+        <h2 className="titulo-cal">Grilla del día</h2>
 
-      <section className="hero-club mb-4">
-        <div className="container">
+        <Row className="align-items-end g-3 mb-4">
+          <Col xs={12} md={4}>
+            <Form.Label>Ver el día</Form.Label>
+            <Form.Control
+              type="date"
+              value={fecha}
+              onChange={(e) => setFecha(e.target.value)}
+            />
+          </Col>
+          <Col xs={12} md={8}>
+            <p className="text-secondary text-capitalize mb-0">
+              {formatearFecha(fecha)} — hacé clic en un turno libre para reservarlo.
+            </p>
+          </Col>
+        </Row>
 
-          <h1>Horarios y disponibilidad</h1>
+        <Table responsive bordered hover className="align-middle bg-white">
+          <thead>
+            <tr>
+              <th>Hora</th>
+              {canchas.map((cancha) => (
+                <th key={cancha.id} className="text-center">
+                  {cancha.nombre}
+                  <br />
+                  <small className="fw-normal text-secondary">{cancha.deporte}</small>
+                </th>
+              ))}
+            </tr>
+          </thead>
 
-          <p>
-            Consultá los horarios disponibles para reservar
-            nuestras canchas.
-          </p>
+          <tbody>
+            {horarios.map((hora) => (
+              <tr key={hora}>
+                <th className="text-nowrap">{hora}</th>
 
-          <p className="fw-semibold mb-0">
-            Hoy es {fechaFormateada}
-          </p>
-
-        </div>
-      </section>
-
-
-      {/* BOTÓN SOLO LIBRES */}
-
-      <button
-        type="button"
-        className="btn btn-club-linea btn-sm mb-3"
-        onClick={() => setSoloLibres(!soloLibres)}
-      >
-        {soloLibres
-          ? "Ver todos los turnos"
-          : "Ver solo turnos libres"
-        }
-      </button>
-
-
-      {/* CANCHAS */}
-
-      <div id="contenido-canchas">
-
-        {canchas.map((cancha) => {
-
-          const cantidadLibres = contarLibres(cancha.turnos);
-
-          return (
-            <section
-              key={cancha.id}
-              className="mb-5"
-            >
-
-              {/* TÍTULO DE LA CANCHA */}
-
-              <h3>
-                {cancha.nombre} - {cancha.numero}
-
-                <span className="chip-estado chip-libre ms-2">
-                  {cantidadLibres} libres
-                </span>
-              </h3>
-
-
-              {/* GRILLA DE TURNOS */}
-
-              <div className="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-2">
-
-                {cancha.turnos.map((turno) => {
-
-                  // Si está activado "solo libres"
-                  // no mostramos los demás turnos.
-
-                  if (
-                    soloLibres &&
-                    turno.estado !== "libre"
-                  ) {
-                    return null;
-                  }
-
-
-                  // Comprobamos si es el horario actual.
-
-                  const esHoraActual =
-                    turno.hora === horaActual;
-
+                {canchas.map((cancha) => {
+                  const estado = estadoDelTurno(reservas, cancha.id, fecha, hora);
 
                   return (
-                    <div
-                      className="col"
-                      key={turno.hora}
-                    >
-
-                      <div
-                       className={`
-                     turno
-                       turno--;{turno.estado}
-                      {esHoraActual ? "turno-actual" : ""}
-`                       }
-
-                      >
-
-                        {/* HORA */}
-
-                        <span className="fw-bold">
-                          {turno.hora}
-                        </span>
-
-
-                        {/* ESTADO */}
-
-                        <span className="chip-estado">
-
-                          {turno.estado === "libre" &&
-                            "Libre"
-                          }
-
-                          {turno.estado === "ocupado" &&
-                            "Ocupado"
-                          }
-
-                          {turno.estado === "pendiente" &&
-                            "A confirmar"
-                          }
-
-                        </span>
-
-                      </div>
-
-                    </div>
+                    <td key={cancha.id} className="text-center">
+                      {estado === "libre" ? (
+                        <Button
+                          as={Link}
+                          to={"/reservar?cancha=" + cancha.id + "&hora=" + hora + "&fecha=" + fecha}
+                          size="sm"
+                          variant="outline-success"
+                        >
+                          Libre
+                        </Button>
+                      ) : (
+                        <Badge bg={colorDelEstado[estado]}>{estado}</Badge>
+                      )}
+                    </td>
                   );
-
                 })}
-
-              </div>
-
-            </section>
-          );
-
-        })}
-
-      </div>
-
-    </main>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </Container>
+    </>
   );
-}
+};
 
 export default Horarios;

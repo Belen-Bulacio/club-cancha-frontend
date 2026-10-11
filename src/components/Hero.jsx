@@ -1,14 +1,14 @@
-import { Container } from "react-bootstrap";
+import { Container } from 'react-bootstrap';
 
-const Hero = ({ titulo, texto }) => {
+function Hero({ titulo, texto }) {
   return (
-    <div className="hero-club py-5">
+    <section className="hero-club">
       <Container>
         <h1>{titulo}</h1>
         <p className="lead mb-0">{texto}</p>
       </Container>
-    </div>
+    </section>
   );
-};
+}
 
 export default Hero;
