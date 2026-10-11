@@ -1,88 +1,138 @@
-import { useState } from "react";
-import { Container, Table, Badge, Button, Form, Row, Col } from "react-bootstrap";
-import { Link } from "react-router-dom";
-import Hero from "../components/Hero";
-import { canchas, horarios } from "../data/datosIniciales";
-import {
-  estadoDelTurno, fechaDeHoy, colorDelEstado, formatearFecha,
-} from "../data/funciones";
+import { useState, useEffect } from 'react';
+import Container from 'react-bootstrap/Container';
+import Table from 'react-bootstrap/Table';
+import Form from 'react-bootstrap/Form';
+import Badge from 'react-bootstrap/Badge';
+import Hero from '../components/Hero';
+import { fechaCorta, formatearPrecio } from '../data/funciones';
 
-const Horarios = ({ reservas = [] }) => {
-  // Permite mirar la grilla de otro día, no solo la de hoy
-  const [fecha, setFecha] = useState(fechaDeHoy());
+const TITULO = 'Clientes | Club Cancha';
+
+// Arma la lista de clientes a partir de las reservas, sin repetir.
+// Por cada uno cuenta sus reservas y suma lo que señó.
+
+function armarClientes(reservas) {
+  const clientes = [];
+
+  reservas.forEach((reserva) => {
+    const existente = clientes.find((cliente) => cliente.telefono === reserva.telefono);
+
+    if (existente) {
+      existente.cantidad = existente.cantidad + 1;
+      existente.senado = existente.senado + Number(reserva.sena);
+      existente.ultimaFecha = reserva.fecha;
+      existente.ultimaHora = reserva.hora;
+    } else {
+      clientes.push({
+        nombre: reserva.cliente,
+        telefono: reserva.telefono,
+        cantidad: 1,
+        senado: Number(reserva.sena),
+        ultimaFecha: reserva.fecha,
+        ultimaHora: reserva.hora,
+      });
+    }
+  });
+
+  return clientes;
+}
+
+// Los clientes cuyo nombre o teléfono contienen lo que se escribió
+
+function filtrarClientes(clientes, busqueda) {
+  const texto = busqueda.trim().toLowerCase();
+
+  if (texto === '') {
+    return clientes;
+  }
+
+  return clientes.filter(
+    (cliente) =>
+      cliente.nombre.toLowerCase().includes(texto) || cliente.telefono.includes(texto),
+  );
+}
+
+function Clientes({ reservas = [] }) {
+  // Lo que se escribió en el buscador
+  const [busqueda, setBusqueda] = useState('');
+
+  // El título de la pestaña, para el SEO: cada página tiene el suyo
+
+  useEffect(() => {
+    document.title = TITULO;
+  }, []);
+
+  const clientes = armarClientes(reservas);
+  const clientesVisibles = filtrarClientes(clientes, busqueda);
+
+  function manejarBusqueda(evento) {
+    setBusqueda(evento.target.value);
+  }
 
   return (
-    <>
-      <Hero
-        titulo="Horarios y disponibilidad"
-        texto="Grilla de turnos por cancha. El club abre de 8 a 00 h."
-      />
+    <main>
+      <Hero titulo="Clientes" texto="Quiénes reservaron, cuántas veces y cuánto señaron." />
 
       <Container className="py-5">
-        <h2 className="titulo-cal">Grilla del día</h2>
+        <section>
+          <h2 className="titulo-cal">Listado de clientes</h2>
 
-        <Row className="align-items-end g-3 mb-4">
-          <Col xs={12} md={4}>
-            <Form.Label>Ver el día</Form.Label>
-            <Form.Control
-              type="date"
-              value={fecha}
-              onChange={(e) => setFecha(e.target.value)}
-            />
-          </Col>
-          <Col xs={12} md={8}>
-            <p className="text-secondary text-capitalize mb-0">
-              {formatearFecha(fecha)} — hacé clic en un turno libre para reservarlo.
-            </p>
-          </Col>
-        </Row>
+          <Form.Group controlId="busqueda" className="mb-4">
+            <Form.Label className="fw-semibold">Buscar cliente</Form.Label>
+            <Form.Control type="search" size="lg" placeholder="Buscar por nombre o teléfono" value={busqueda} onChange={manejarBusqueda}/>
+          </Form.Group>
 
-        <Table responsive bordered hover className="align-middle bg-white">
-          <thead>
-            <tr>
-              <th>Hora</th>
-              {canchas.map((cancha) => (
-                <th key={cancha.id} className="text-center">
-                  {cancha.nombre}
-                  <br />
-                  <small className="fw-normal text-secondary">{cancha.deporte}</small>
-                </th>
-              ))}
-            </tr>
-          </thead>
+          {clientesVisibles.length === 0 && (
+            <p className="text-secondary">No hay clientes para mostrar.</p>
+          )}
 
-          <tbody>
-            {horarios.map((hora) => (
-              <tr key={hora}>
-                <th className="text-nowrap">{hora}</th>
+          {clientesVisibles.length > 0 && (
+            <Table responsive hover className="align-middle bg-white">
+              <caption className="text-secondary">
+                Clientes del club, deducidos de las reservas cargadas.
+              </caption>
 
-                {canchas.map((cancha) => {
-                  const estado = estadoDelTurno(reservas, cancha.id, fecha, hora);
+              <thead>
+                <tr>
+                  <th scope="col">Cliente</th>
+                  <th scope="col">Teléfono</th>
+                  <th scope="col" className="text-center">
+                    Reservas
+                  </th>
+                  <th scope="col" className="d-none d-md-table-cell">
+                    Señado
+                  </th>
+                  <th scope="col" className="d-none d-md-table-cell">
+                    Última
+                  </th>
+                </tr>
+              </thead>
 
-                  return (
-                    <td key={cancha.id} className="text-center">
-                      {estado === "libre" ? (
-                        <Button
-                          as={Link}
-                          to={"/reservar?cancha=" + cancha.id + "&hora=" + hora + "&fecha=" + fecha}
-                          size="sm"
-                          variant="outline-success"
-                        >
-                          Libre
-                        </Button>
-                      ) : (
-                        <Badge bg={colorDelEstado[estado]}>{estado}</Badge>
-                      )}
+              <tbody>
+                {clientesVisibles.map((cliente) => (
+                  <tr key={cliente.telefono}>
+                    <th scope="row" className="fw-normal">
+                      {cliente.nombre}
+                    </th>
+                    <td>{cliente.telefono}</td>
+                    <td className="text-center">
+                      <Badge bg="secondary">{cliente.cantidad}</Badge>
                     </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </Table>
+                    <td className="d-none d-md-table-cell">
+                      {formatearPrecio(cliente.senado)}
+                    </td>
+                    <td className="d-none d-md-table-cell">
+                      {fechaCorta(cliente.ultimaFecha)} · {cliente.ultimaHora}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
+        </section>
       </Container>
-    </>
+    </main>
   );
-};
+}
 
-export default Horarios;
+export default Clientes;
