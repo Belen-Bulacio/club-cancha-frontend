@@ -1,6 +1,5 @@
 // La fecha de hoy en hora de Argentina.
-// No se usa toISOString() porque devuelve la hora UTC: después de las 21
-// ya sería el día siguiente y el sistema mostraría mal el día.
+
 const ahora = new Date();
 const anio = ahora.getFullYear();
 const mes = String(ahora.getMonth() + 1).padStart(2, '0');

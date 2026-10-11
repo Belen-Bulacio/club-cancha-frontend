@@ -1,7 +1,5 @@
-import Container from 'react-bootstrap/Container';
+import { Container } from 'react-bootstrap';
 
-// El encabezado de todas las páginas. Es un <section> con el <h1>,
-// que es lo que pide el SEO: un solo h1 por página.
 function Hero({ titulo, texto }) {
   return (
     <section className="hero-club">

@@ -1,20 +1,11 @@
 import { useState, useEffect } from 'react';
-import Card from 'react-bootstrap/Card';
-import ListGroup from 'react-bootstrap/ListGroup';
-import Badge from 'react-bootstrap/Badge';
-import Spinner from 'react-bootstrap/Spinner';
+import { Card, ListGroup, Badge, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import {
-  fechaDeHoy,
-  fechaCorta,
-  nombreDelDia,
-  contarReservasDelDia,
-} from '../data/funciones';
+import {fechaDeHoy, fechaCorta, nombreDelDia, contarReservasDelDia,} from '../data/funciones';
 
-// La dirección de la API sale del archivo .env: no se escribe acá
+
 const API_URL = import.meta.env.VITE_API_URL;
-
 const CUANTOS = 4;
 
 // Los feriados que todavía no pasaron, ordenados por fecha y recortados
@@ -33,9 +24,7 @@ function ProximosFeriados({ reservas = [] }) {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    // useEffect no puede ser async, porque React espera que devuelva la
-    // función de limpieza y una función async siempre devuelve una promesa.
-    // Entonces se declara la función async adentro y se la llama.
+
     async function traerFeriados() {
       try {
         const anio = new Date().getFullYear();
@@ -50,8 +39,6 @@ function ProximosFeriados({ reservas = [] }) {
           confirmButtonText: 'Entendido',
         });
       } finally {
-        // El finally corre siempre, salga bien o mal: el cartel de carga
-        // tiene que desaparecer en los dos casos.
         setCargando(false);
       }
     }
@@ -90,10 +77,7 @@ function ProximosFeriados({ reservas = [] }) {
               const cantidad = contarReservasDelDia(reservas, feriado.fecha);
 
               return (
-                <ListGroup.Item
-                  key={feriado.fecha}
-                  className="px-0 d-flex justify-content-between align-items-start gap-2"
-                >
+                <ListGroup.Item key={feriado.fecha} className="px-0 d-flex justify-content-between align-items-start gap-2">
                   <div>
                     <strong className="text-capitalize">
                       {nombreDelDia(feriado.fecha)} {fechaCorta(feriado.fecha)}
