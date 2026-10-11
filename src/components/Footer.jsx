@@ -1,7 +1,4 @@
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Nav from 'react-bootstrap/Nav';
+import { Container, Row, Col, Nav } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom';
 
 const secciones = [

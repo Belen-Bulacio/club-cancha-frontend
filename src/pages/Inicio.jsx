@@ -1,34 +1,14 @@
 import { useState, useEffect } from 'react';
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Card from 'react-bootstrap/Card';
-import Table from 'react-bootstrap/Table';
-import Badge from 'react-bootstrap/Badge';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
-import Form from 'react-bootstrap/Form';
+import { Container, Row, Col, Card, Table, Badge, Button, Modal, Form } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import Hero from '../components/Hero';
 import ProximosFeriados from '../components/ProximosFeriados';
 import { canchas, horarios, duracionesPorTipo } from '../data/datosIniciales';
-import {
-  fechaDeHoy,
-  formatearFecha,
-  estadoReal,
-  colorDelEstado,
-  calcularPrecio,
-  senaMinima,
-  formatearPrecio,
-  soloLetras,
-  soloNumeros,
-  contarNumeros,
-  avisar,
-} from '../data/funciones';
+import {fechaDeHoy, formatearFecha, estadoReal, colorDelEstado, calcularPrecio, senaMinima, formatearPrecio, soloLetras, soloNumeros, contarNumeros, avisar,} from '../data/funciones';
 
 const TITULO = 'Panel del día | Club Cancha';
 
-// Las tarjetas del resumen: qué estado contar y con qué título mostrarlo
+
 const resumen = [
   { estado: 'reservada', titulo: 'Reservadas' },
   { estado: 'en curso', titulo: 'En curso' },
@@ -49,18 +29,15 @@ function reservasDelDia(reservas, fecha) {
   return reservas.filter((reserva) => reserva.fecha === fecha);
 }
 
-// Cuántas reservas hay en ese estado
 function contarPorEstado(reservas, estado) {
   return reservas.filter((reserva) => estadoReal(reserva) === estado).length;
 }
 
-// Busca una cancha por su id
 function buscarCancha(canchaId) {
   const encontrada = canchas.find((cancha) => cancha.id === canchaId);
   return encontrada || null;
 }
 
-// Cuánto sale una reserva, mirando el tipo de su cancha
 function precioDeLaReserva(reserva) {
   const cancha = buscarCancha(reserva.canchaId);
   if (cancha === null) {
@@ -70,7 +47,7 @@ function precioDeLaReserva(reserva) {
 }
 
 // Revisa los datos del modal y devuelve un objeto con los errores.
-// Si no hay errores, el objeto queda vacío.
+
 function validar(datos, minimo) {
   const errores = {};
 
@@ -133,7 +110,7 @@ function Inicio({ reservas = [], editar, cancelar, borrar }) {
   }
 
   // Un solo manejador para todos los campos del modal.
-  // El name del input dice qué dato cambiar, y qué se le deja escribir.
+
   function manejarCambio(evento) {
     const { name, value } = evento.target;
 
@@ -279,29 +256,15 @@ function Inicio({ reservas = [], editar, cancelar, borrar }) {
                             <Badge bg={colorDelEstado[estado]}>{estado}</Badge>
                           </td>
                           <td className="text-end text-nowrap">
-                            <Button
-                              size="sm"
-                              variant="outline-primary"
-                              className="me-1"
-                              onClick={() => abrirModal(reserva)}
-                            >
+                            <Button size="sm" variant="outline-primary" className="me-1" onClick={() => abrirModal(reserva)}>
                               Editar
                             </Button>
                             {estado === 'reservada' && (
-                              <Button
-                                size="sm"
-                                variant="outline-warning"
-                                className="me-1"
-                                onClick={() => cancelar(reserva.id)}
-                              >
+                              <Button size="sm" variant="outline-warning" className="me-1" onClick={() => cancelar(reserva.id)}>
                                 Cancelar
                               </Button>
                             )}
-                            <Button
-                              size="sm"
-                              variant="outline-danger"
-                              onClick={() => pedirBorrado(reserva)}
-                            >
+                            <Button size="sm" variant="outline-danger" onClick={() => pedirBorrado(reserva)}>
                               Borrar
                             </Button>
                           </td>
@@ -333,15 +296,8 @@ function Inicio({ reservas = [], editar, cancelar, borrar }) {
               <Col xs={12}>
                 <Form.Group controlId="cliente">
                   <Form.Label className="fw-semibold">Cliente</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="cliente"
-                    size="lg"
-                    placeholder="Pérez, Juan"
-                    value={datos.cliente}
-                    onChange={manejarCambio}
-                    isInvalid={Boolean(errores.cliente)}
-                  />
+                  <Form.Control type="text" name="cliente" size="lg" placeholder="Pérez, Juan" value={datos.cliente} onChange={manejarCambio} isInvalid={Boolean(errores.cliente)}/> 
+
                   <Form.Control.Feedback type="invalid">
                     {errores.cliente}
                   </Form.Control.Feedback>
@@ -351,15 +307,7 @@ function Inicio({ reservas = [], editar, cancelar, borrar }) {
               <Col xs={12}>
                 <Form.Group controlId="telefono">
                   <Form.Label className="fw-semibold">Teléfono</Form.Label>
-                  <Form.Control
-                    type="tel"
-                    name="telefono"
-                    size="lg"
-                    placeholder="3884000000"
-                    value={datos.telefono}
-                    onChange={manejarCambio}
-                    isInvalid={Boolean(errores.telefono)}
-                  />
+                  <Form.Control type="tel" name="telefono" size="lg" placeholder="3884000000" value={datos.telefono} onChange={manejarCambio} isInvalid={Boolean(errores.telefono)}/>
                   <Form.Control.Feedback type="invalid">
                     {errores.telefono}
                   </Form.Control.Feedback>
@@ -369,12 +317,7 @@ function Inicio({ reservas = [], editar, cancelar, borrar }) {
               <Col xs={6}>
                 <Form.Group controlId="hora">
                   <Form.Label className="fw-semibold">Hora</Form.Label>
-                  <Form.Select
-                    name="hora"
-                    size="lg"
-                    value={datos.hora}
-                    onChange={manejarCambio}
-                  >
+                  <Form.Select name="hora" size="lg" value={datos.hora} onChange={manejarCambio}>
                     {horarios.map((hora) => (
                       <option key={hora} value={hora}>
                         {hora}
@@ -387,12 +330,7 @@ function Inicio({ reservas = [], editar, cancelar, borrar }) {
               <Col xs={6}>
                 <Form.Group controlId="duracion">
                   <Form.Label className="fw-semibold">Duración</Form.Label>
-                  <Form.Select
-                    name="duracion"
-                    size="lg"
-                    value={datos.duracion}
-                    onChange={manejarCambio}
-                  >
+                  <Form.Select name="duracion" size="lg" value={datos.duracion} onChange={manejarCambio}>
                     {duraciones.map((opcion) => (
                       <option key={opcion} value={opcion}>
                         {opcion} h
@@ -408,15 +346,7 @@ function Inicio({ reservas = [], editar, cancelar, borrar }) {
                     Seña — el turno sale {formatearPrecio(precio)}, mínimo{' '}
                     {formatearPrecio(minimo)}
                   </Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="sena"
-                    size="lg"
-                    min={minimo}
-                    value={datos.sena}
-                    onChange={manejarCambio}
-                    isInvalid={Boolean(errores.sena)}
-                  />
+                  <Form.Control type="number" name="sena" size="lg" min={minimo} value={datos.sena} onChange={manejarCambio} isInvalid={Boolean(errores.sena)}/>
                   <Form.Control.Feedback type="invalid">
                     {errores.sena}
                   </Form.Control.Feedback>
@@ -438,5 +368,4 @@ function Inicio({ reservas = [], editar, cancelar, borrar }) {
     </main>
   );
 }
-
 export default Inicio;

@@ -1,6 +1,4 @@
-/* Identidad visual del club. Todo lo demás lo resuelve Bootstrap.
-   Acá quedan solo los estilos que Bootstrap no puede dar: la paleta,
-   las fuentes propias y los cuatro gestos de la marca. */
+/* Identidad visual del club. Todo lo demás lo resuelve Bootstrap.*/
 
 :root {
   --verde-noche: #07211b;
@@ -46,8 +44,7 @@ h1, h2 {
   color: var(--texto-suave) !important;
 }
 
-/* Solo la primera letra en mayúscula. El text-capitalize de Bootstrap
-   pone cada palabra en mayúscula y queda "10 De Octubre De 2026". */
+/* Solo la primera letra en mayúscula. */
 .primera-mayuscula::first-letter {
   text-transform: uppercase;
 }

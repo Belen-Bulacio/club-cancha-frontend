@@ -1,11 +1,8 @@
 import Swal from 'sweetalert2';
 import { tarifas, horarios } from './datosIniciales';
 
-// ==================== Avisos ====================
+// Aviso corto que aparece arriba a la derecha y se va solo. Es un toast y no un modal porque salta con cada tecla equivocada
 
-// Aviso corto que aparece arriba a la derecha y se va solo.
-// Es un toast y no un modal porque salta con cada tecla equivocada:
-// un modal que hay que cerrar a mano sería insoportable.
 export function avisar(texto) {
   Swal.fire({
     toast: true,
@@ -18,7 +15,7 @@ export function avisar(texto) {
   });
 }
 
-// ==================== Validaciones ====================
+// Validaciones 
 
 const LETRAS = 'abcdefghijklmnñopqrstuvwxyzáéíóúüABCDEFGHIJKLMNÑOPQRSTUVWXYZÁÉÍÓÚÜ ';
 const NUMEROS = '0123456789';
@@ -29,7 +26,6 @@ export function contarNumeros(texto) {
 }
 
 // Deja pasar solo letras y espacios.
-// En un nombre no se pueden escribir números: directamente no entran.
 export function soloLetras(texto) {
   return texto
     .split('')
@@ -45,7 +41,7 @@ export function soloNumeros(texto) {
     .join('');
 }
 
-// ==================== Fechas y horas ====================
+// Fechas y horas 
 
 // Agrega un cero adelante si hace falta: 5 -> '05'
 function dosDigitos(numero) {
@@ -53,8 +49,7 @@ function dosDigitos(numero) {
 }
 
 // La fecha de hoy en hora de Argentina.
-// No se usa toISOString() porque devuelve la hora UTC: después de las 21
-// ya sería el día siguiente y el sistema mostraría mal el día.
+
 export function fechaDeHoy() {
   const hoy = new Date();
   return `${hoy.getFullYear()}-${dosDigitos(hoy.getMonth() + 1)}-${dosDigitos(hoy.getDate())}`;
@@ -99,6 +94,7 @@ export function numeroEnHora(numero) {
 
 // La primera hora en la que todavía se puede cargar un turno hoy.
 // Si son las 19:30, el próximo turno que se puede vender es el de las 20.
+
 export function proximaHoraDeHoy() {
   const ahora = new Date();
   if (ahora.getMinutes() > 0) {
@@ -107,7 +103,7 @@ export function proximaHoraDeHoy() {
   return ahora.getHours();
 }
 
-// ¿Ese turno ya pasó? No se puede reservar en el pasado.
+// No se puede reservar en el pasado.
 export function turnoPasado(fecha, hora) {
   const hoy = fechaDeHoy();
 
@@ -117,7 +113,7 @@ export function turnoPasado(fecha, hora) {
   return fecha === hoy && horaEnNumero(hora) < proximaHoraDeHoy();
 }
 
-// ==================== Precios ====================
+// Precios 
 
 // Antes de las 17 es tarifa de día; de las 17 en adelante, de noche
 export function franjaDeLaHora(hora) {
@@ -156,10 +152,9 @@ export function formatearPrecio(numero) {
   return `$${Number(numero).toLocaleString('es-AR')}`;
 }
 
-// ==================== Estados ====================
+// Estados   
 
-// El estado se calcula con la hora. De los datos solo sale si fue cancelada,
-// porque eso lo decide una persona.
+// El estado se calcula con la hora. De los datos solo sale si fue cancelada
 export function estadoReal(reserva) {
   if (reserva.estado === 'cancelada') {
     return 'cancelada';
@@ -216,8 +211,6 @@ export function estadoDelTurno(reservas, canchaId, fecha, hora) {
   return estadoReal(reserva);
 }
 
-// ¿Está libre todo el rango y todavía no pasó?
-// Un turno de 2 horas necesita 2 horas libres seguidas.
 // Esto es lo que impide que dos reservas se superpongan.
 export function rangoLibre(reservas, canchaId, fecha, hora, duracion) {
   if (turnoPasado(fecha, hora)) {

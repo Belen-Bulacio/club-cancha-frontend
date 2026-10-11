@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
-import Container from 'react-bootstrap/Container';
-import Button from 'react-bootstrap/Button';
+import { Container, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
 const TITULO = 'Página no encontrada | Club Cancha';
