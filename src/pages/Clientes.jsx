@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { Container, Table, Form, Badge } from "react-bootstrap";
-import Hero from "../components/Hero";
-import { fechaCorta, formatearPrecio } from "../data/funciones";
 
 const Clientes = ({ reservas = [] }) => {
   const [busqueda, setBusqueda] = useState("");
