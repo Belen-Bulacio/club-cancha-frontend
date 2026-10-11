@@ -123,3 +123,35 @@ export const rangoLibre = (reservas, canchaId, fecha, hora, duracion) => {
 
   return true;
 };
+export const turnoPasado = (fecha, hora) => {
+  if (fecha === "" || hora === "") {
+    return false;
+  }
+
+  const fechaHoraTurno = new Date(fecha + "T" + hora);
+  const fechaHoraActual = new Date();
+
+  return fechaHoraTurno < fechaHoraActual;
+};
+
+export const soloLetras = (texto) => {
+  return texto.replace(/[0-9]/g, "");
+};
+
+export const soloNumeros = (texto) => {
+  return texto.replace(/[^0-9]/g, "");
+};
+
+export const contarNumeros = (texto) => {
+  const numeros = texto.match(/[0-9]/g);
+
+  if (numeros === null) {
+    return 0;
+  }
+
+  return numeros.length;
+};
+
+export const avisar = (mensaje) => {
+  alert(mensaje);
+};
