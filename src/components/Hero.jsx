@@ -1,14 +1,16 @@
-import { Container } from "react-bootstrap";
+import Container from 'react-bootstrap/Container';
 
-const Hero = ({ titulo, texto }) => {
+// El encabezado de todas las páginas. Es un <section> con el <h1>,
+// que es lo que pide el SEO: un solo h1 por página.
+function Hero({ titulo, texto }) {
   return (
-    <div className="hero-club py-5">
+    <section className="hero-club">
       <Container>
         <h1>{titulo}</h1>
         <p className="lead mb-0">{texto}</p>
       </Container>
-    </div>
+    </section>
   );
-};
+}
 
 export default Hero;

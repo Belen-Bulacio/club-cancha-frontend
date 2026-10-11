@@ -1,7 +1,26 @@
-body {
-  margin: 0;
+/* Identidad visual del club. Todo lo demás lo resuelve Bootstrap.
+   Acá quedan solo los estilos que Bootstrap no puede dar: la paleta,
+   las fuentes propias y los cuatro gestos de la marca. */
+
+:root {
+  --verde-noche: #07211b;
+  --verde-bosque: #0e3a2f;
+  --verde-cancha: #12694a;
+  --lima: #c3e04a;
+  --cal: #f6f8f4;
+  --texto: #16211c;
+  --texto-suave: #5b6b63;
+  --fuente-titulo: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --fuente-texto: 'Work Sans', 'Segoe UI', sans-serif;
 }
 
+body {
+  margin: 0;
+  font-family: var(--fuente-texto);
+  background-color: var(--cal);
+  color: var(--texto);
+  line-height: 1.6;
+}
 
 #root {
   min-height: 100vh;
@@ -11,4 +30,99 @@ body {
 
 #root > main {
   flex: 1;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--fuente-titulo);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+h1, h2 {
+  text-transform: uppercase;
+}
+
+.text-secondary {
+  color: var(--texto-suave) !important;
+}
+
+/* Solo la primera letra en mayúscula. El text-capitalize de Bootstrap
+   pone cada palabra en mayúscula y queda "10 De Octubre De 2026". */
+.primera-mayuscula::first-letter {
+  text-transform: uppercase;
+}
+
+/* La línea de cal al costado de los títulos */
+.titulo-cal {
+  border-left: 4px solid var(--lima);
+  padding-left: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.btn-club {
+  background-color: var(--lima);
+  color: var(--verde-noche);
+  border: 2px solid var(--lima);
+  border-radius: 999px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.55rem 1.5rem;
+}
+
+.btn-club:hover,
+.btn-club:focus {
+  background-color: var(--verde-noche);
+  color: var(--lima);
+  border-color: var(--verde-noche);
+}
+
+.navbar-club {
+  background-color: var(--verde-noche);
+  border-bottom: 3px solid var(--lima);
+}
+
+.navbar-club .nav-link {
+  color: var(--cal);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.88rem;
+}
+
+.navbar-club .nav-link:hover,
+.navbar-club .nav-link.active {
+  color: var(--lima);
+}
+
+.hero-club {
+  background: linear-gradient(
+    135deg,
+    var(--verde-noche) 0%,
+    var(--verde-bosque) 55%,
+    var(--verde-cancha) 100%
+  );
+  color: var(--cal);
+  padding: 4.5rem 0;
+  border-bottom: 3px solid var(--lima);
+}
+
+.hero-club h1 {
+  color: #ffffff;
+  margin-bottom: 1rem;
+}
+
+.pie-club {
+  background-color: var(--verde-noche);
+  border-top: 3px solid var(--lima);
+  color: var(--cal);
+}
+
+.pie-club a {
+  color: var(--lima);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.pie-club a:hover {
+  text-decoration: underline;
 }
