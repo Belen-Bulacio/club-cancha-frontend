@@ -1,47 +1,53 @@
-import { useState, useEffect } from "react";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-import Rutas from "./components/routes/Rutas";
-import { reservasIniciales } from "./data/datosIniciales";
-import "./App.css";
+import { useState, useEffect } from 'react';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import Rutas from './components/routes/Rutas';
+import { reservasIniciales } from './data/datosIniciales';
 
-const App = () => {
-  const guardadas = localStorage.getItem("reservas");
-  const inicial = guardadas ? JSON.parse(guardadas) : reservasIniciales;
+// Lee las reservas que el navegador tenga guardadas.
+// Si no hay ninguna, arranca con las de ejemplo.
+function leerReservasGuardadas() {
+  const guardadas = localStorage.getItem('reservas');
+  if (guardadas === null) {
+    return reservasIniciales;
+  }
+  return JSON.parse(guardadas);
+}
 
-  const [reservas, setReservas] = useState(inicial);
+function App() {
+  // La única lista de reservas del sistema. Todas las páginas la leen.
+  const [reservas, setReservas] = useState(leerReservasGuardadas);
 
+  // Cada vez que la lista cambia, se vuelve a guardar en el navegador.
+  // Por eso los cambios no se pierden al recargar la página.
   useEffect(() => {
-    localStorage.setItem("reservas", JSON.stringify(reservas));
+    localStorage.setItem('reservas', JSON.stringify(reservas));
   }, [reservas]);
 
   // CREATE
-  const agregarReserva = (nueva) => {
-    const reserva = { ...nueva, id: Date.now(), estado: "reservada" };
-    setReservas([...reservas, reserva]);
-  };
+  function agregarReserva(datos) {
+    const nueva = { ...datos, id: Date.now(), estado: 'reservada' };
+    setReservas([...reservas, nueva]);
+  }
 
   // UPDATE
-  const editarReserva = (id, cambios) => {
+  function editarReserva(id, cambios) {
     setReservas(
-      reservas.map((reserva) => {
-        if (reserva.id === id) {
-          return { ...reserva, ...cambios };
-        }
-        return reserva;
-      }),
+      reservas.map((reserva) =>
+        reserva.id === id ? { ...reserva, ...cambios } : reserva,
+      ),
     );
-  };
+  }
 
   // UPDATE (caso especial: cancelar)
-  const cancelarReserva = (id) => {
-    editarReserva(id, { estado: "cancelada" });
-  };
+  function cancelarReserva(id) {
+    editarReserva(id, { estado: 'cancelada' });
+  }
 
   // DELETE
-  const borrarReserva = (id) => {
+  function borrarReserva(id) {
     setReservas(reservas.filter((reserva) => reserva.id !== id));
-  };
+  }
 
   return (
     <>
@@ -56,6 +62,6 @@ const App = () => {
       <Footer />
     </>
   );
-};
+}
 
 export default App;
