@@ -113,8 +113,11 @@ function Reservar({ reservas = [], agregar }) {
   // Si venimos desde Canchas u Horarios, llegan la cancha, la hora y el día
   const [parametros] = useSearchParams();
 
+  const canchaElegida = buscarCancha(parametros.get('cancha'));
+
   const [datos, setDatos] = useState({
     ...datosIniciales,
+    tipo: canchaElegida === null ? '' : canchaElegida.tipo,
     canchaId: parametros.get('cancha') || '',
     hora: parametros.get('hora') || '',
     fecha: parametros.get('fecha') || fechaDeHoy(),
