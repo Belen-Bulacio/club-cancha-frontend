@@ -124,17 +124,17 @@ export function franjaDeLaHora(hora) {
 }
 
 // Cuánto sale el turno
-export function calcularPrecio(tipo, duracion, hora) {
-  if (tipo === '' || hora === '') {
+export function calcularPrecio(deporte, duracion, hora) {
+  if (deporte === '' || hora === '') {
     return 0;
   }
 
-  const porTipo = tarifas[tipo];
-  if (porTipo === undefined) {
+  const porDeporte = tarifas[deporte];
+  if (porDeporte === undefined) {
     return 0;
   }
 
-  const porDuracion = porTipo[duracion];
+  const porDuracion = porDeporte[duracion];
   if (porDuracion === undefined) {
     return 0;
   }

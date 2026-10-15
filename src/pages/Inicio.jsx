@@ -21,7 +21,6 @@ const datosIniciales = {
   telefono: '',
   hora: '',
   duracion: 1,
-  sena: 0,
 };
 
 // Las reservas de un día
@@ -43,12 +42,12 @@ function precioDeLaReserva(reserva) {
   if (cancha === null) {
     return 0;
   }
-  return calcularPrecio(cancha.tipo, reserva.duracion, reserva.hora);
+  return calcularPrecio(cancha.deporte, reserva.duracion, reserva.hora);
 }
 
 // Revisa los datos del modal y devuelve un objeto con los errores.
 
-function validar(datos, minimo) {
+function validar(datos) {
   const errores = {};
 
   if (datos.cliente.trim().length < 3) {
@@ -57,10 +56,6 @@ function validar(datos, minimo) {
 
   if (contarNumeros(datos.telefono) < 8) {
     errores.telefono = 'El teléfono tiene que tener al menos 8 números.';
-  }
-
-  if (Number(datos.sena) < minimo) {
-    errores.sena = `La seña no puede ser menor a ${formatearPrecio(minimo)}.`;
   }
 
   return errores;
@@ -88,8 +83,9 @@ function Inicio({ reservas = [], editar, cancelar, borrar }) {
   const cancha = editando === null ? null : buscarCancha(editando.canchaId);
   const tipo = cancha === null ? '' : cancha.tipo;
   const duraciones = tipo === '' ? [1] : duracionesPorTipo[tipo];
-  const precio = calcularPrecio(tipo, Number(datos.duracion), datos.hora);
-  const minimo = senaMinima(precio);
+  const deporte = cancha === null ? '' : cancha.deporte;
+  const precio = calcularPrecio(deporte, Number(datos.duracion), datos.hora);
+  const sena = senaMinima(precio);
 
   function abrirModal(reserva) {
     setEditando(reserva);
@@ -99,7 +95,6 @@ function Inicio({ reservas = [], editar, cancelar, borrar }) {
       telefono: reserva.telefono,
       hora: reserva.hora,
       duracion: reserva.duracion,
-      sena: reserva.sena,
     });
   }
 
@@ -136,7 +131,7 @@ function Inicio({ reservas = [], editar, cancelar, borrar }) {
   }
 
   function guardarCambios() {
-    const nuevosErrores = validar(datos, minimo);
+    const nuevosErrores = validar(datos);
     setErrores(nuevosErrores);
 
     if (Object.keys(nuevosErrores).length > 0) {
@@ -148,7 +143,7 @@ function Inicio({ reservas = [], editar, cancelar, borrar }) {
       telefono: datos.telefono,
       hora: datos.hora,
       duracion: Number(datos.duracion),
-      sena: Number(datos.sena),
+      sena: sena,
     });
     cerrarModal();
   }
@@ -207,7 +202,7 @@ function Inicio({ reservas = [], editar, cancelar, borrar }) {
               )}
 
               {reservasDeHoy.length > 0 && (
-                <Table responsive hover className="align-middle bg-white">
+                <Table responsive hover size="sm" className="align-middle bg-white"> 
                   <caption className="text-secondary">
                     Reservas cargadas para el día de hoy.
                   </caption>
@@ -218,13 +213,13 @@ function Inicio({ reservas = [], editar, cancelar, borrar }) {
                       <th scope="col" className="d-none d-md-table-cell">
                         Cancha
                       </th>
-                      <th scope="col" className="d-none d-lg-table-cell">
+                      <th scope="col" className="d-none d-xl-table-cell">
                         Duración
                       </th>
-                      <th scope="col" className="d-none d-lg-table-cell">
+                      <th scope="col" className="d-none d-xl-table-cell">
                         Precio
                       </th>
-                      <th scope="col" className="d-none d-lg-table-cell">
+                      <th scope="col" className="d-none d-xl-table-cell">
                         Seña
                       </th>
                       <th scope="col">Estado</th>
@@ -245,27 +240,27 @@ function Inicio({ reservas = [], editar, cancelar, borrar }) {
                           <td className="d-none d-md-table-cell">
                             {suCancha === null ? '—' : suCancha.nombre}
                           </td>
-                          <td className="d-none d-lg-table-cell">{reserva.duracion} h</td>
-                          <td className="d-none d-lg-table-cell">
+                          <td className=" d-none d-xl-table-cell">{reserva.duracion} h</td>
+                          <td className=" d-none d-xl-table-cell">
                             {formatearPrecio(precioDeLaReserva(reserva))}
                           </td>
-                          <td className="d-none d-lg-table-cell">
+                          <td className=" d-none d-xl-table-cell">
                             {formatearPrecio(reserva.sena)}
                           </td>
                           <td>
                             <Badge bg={colorDelEstado[estado]}>{estado}</Badge>
                           </td>
                           <td className="text-end text-nowrap">
-                            <Button size="sm" variant="outline-primary" className="me-1" onClick={() => abrirModal(reserva)}>
-                              Editar
+                            <Button size="sm" variant="outline-primary" className="me-1" aria-label="Editar" title="Editar" onClick={() => abrirModal(reserva)}>
+                              <i className="bi bi-pencil"></i>
                             </Button>
                             {estado === 'reservada' && (
-                              <Button size="sm" variant="outline-warning" className="me-1" onClick={() => cancelar(reserva.id)}>
-                                Cancelar
+                              <Button size="sm" variant="outline-warning" className="me-1" aria-label="Cancelar reserva" title="Cancelar reserva" onClick={() => cancelar(reserva.id)}>
+                                <i className="bi bi-x-circle"></i>
                               </Button>
                             )}
-                            <Button size="sm" variant="outline-danger" onClick={() => pedirBorrado(reserva)}>
-                              Borrar
+                            <Button size="sm" variant="outline-danger" aria-label="Borrar" title="Borrar" onClick={() => pedirBorrado(reserva)}>
+                              <i className="bi bi-trash"></i>
                             </Button>
                           </td>
                         </tr>
@@ -343,13 +338,9 @@ function Inicio({ reservas = [], editar, cancelar, borrar }) {
               <Col xs={12}>
                 <Form.Group controlId="sena">
                   <Form.Label className="fw-semibold">
-                    Seña — el turno sale {formatearPrecio(precio)}, mínimo{' '}
-                    {formatearPrecio(minimo)}
+                    Seña — el turno sale {formatearPrecio(precio)}, la seña es la mitad
                   </Form.Label>
-                  <Form.Control type="number" name="sena" size="lg" min={minimo} value={datos.sena} onChange={manejarCambio} isInvalid={Boolean(errores.sena)}/>
-                  <Form.Control.Feedback type="invalid">
-                    {errores.sena}
-                  </Form.Control.Feedback>
+                  <Form.Control type="text" size="lg" className="bg-light" readOnly value={formatearPrecio(sena)}/>
                 </Form.Group>
               </Col>
             </Row>

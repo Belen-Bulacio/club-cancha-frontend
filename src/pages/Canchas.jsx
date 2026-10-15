@@ -105,9 +105,7 @@ function Canchas({ reservas = [] }) {
                               <th scope="row">{duracion} h</th>
                               {franjas.map((franja) => (
                                 <td key={franja.titulo}>
-                                  {formatearPrecio(
-                                    calcularPrecio(cancha.tipo, duracion, franja.horaEjemplo),
-                                  )}
+                                  {formatearPrecio(calcularPrecio(cancha.deporte, duracion, franja.horaEjemplo))}
                                 </td>
                               ))}
                             </tr>
