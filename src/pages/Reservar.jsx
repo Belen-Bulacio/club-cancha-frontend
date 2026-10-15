@@ -17,8 +17,7 @@ const datosIniciales = {
   canchaId: '',
   fecha: '',
   hora: '',
-  duracion: 1,
-  sena: '',
+  duracion: '',
   politica: false,
 };
 
@@ -48,7 +47,7 @@ function horasLibres(reservas, canchaId, fecha) {
 // Revisa todos los datos y devuelve un objeto con los errores encontrados.
 // Si no hay errores, el objeto queda vacío.
 
-function validar(datos, reservas, minimo) {
+function validar(datos, reservas) {
   const errores = {};
 
   if (datos.apellido.trim().length < 2) {
@@ -79,13 +78,17 @@ function validar(datos, reservas, minimo) {
     errores.hora = 'Elegí la hora de inicio.';
   }
 
+  if (datos.duracion === '') {
+    errores.duracion = 'Elegí cuánto dura el turno.';
+  }
+
   // No se puede reservar en el pasado
   if (datos.fecha !== '' && datos.hora !== '' && turnoPasado(datos.fecha, datos.hora)) {
     errores.hora = 'No se puede reservar en un día o una hora que ya pasaron.';
   }
 
   // El turno no puede pisar otra reserva ni pasar el horario de cierre
-  if (datos.canchaId !== '' && datos.hora !== '' && datos.fecha !== '') {
+  if (datos.canchaId !== '' && datos.hora !== '' && datos.fecha !== '' && datos.duracion !== '') {
     const libre = rangoLibre(
       reservas,
       Number(datos.canchaId),
@@ -96,10 +99,6 @@ function validar(datos, reservas, minimo) {
     if (!libre) {
       errores.hora = 'Ese turno se superpone con otra reserva o pasa el cierre.';
     }
-  }
-
-  if (Number(datos.sena) < minimo) {
-    errores.sena = `La seña no puede ser menor a ${formatearPrecio(minimo)}.`;
   }
 
   if (!datos.politica) {
@@ -137,8 +136,9 @@ function Reservar({ reservas = [], agregar }) {
   const cancha = buscarCancha(datos.canchaId);
   const tipo = cancha === null ? datos.tipo : cancha.tipo;
   const duraciones = tipo === '' ? [1] : duracionesPorTipo[tipo];
-  const precio = calcularPrecio(tipo, Number(datos.duracion), datos.hora);
-  const minimo = senaMinima(precio);
+  const deporte = cancha === null ? '' : cancha.deporte;
+  const precio = calcularPrecio(deporte, Number(datos.duracion), datos.hora);
+  const sena = senaMinima(precio);
 
   const opcionesDeCancha = canchasDelDeporte(datos.tipo);
   const opcionesDeHora = horasLibres(reservas, datos.canchaId, datos.fecha);
@@ -171,7 +171,13 @@ function Reservar({ reservas = [], agregar }) {
 
     // Si cambia el deporte, se borra la cancha que estaba elegida
     if (name === 'tipo') {
-      setDatos({ ...datos, tipo: value, canchaId: '', duracion: 1 });
+      setDatos({ ...datos, tipo: value, canchaId: '', hora: '', duracion: '' });
+      return;
+    }
+
+    // Si cambia la cancha o el día, la hora elegida puede no estar libre: se vuelve a elegir
+    if (name === 'canchaId' || name === 'fecha') {
+      setDatos({ ...datos, [name]: value, hora: '' });
       return;
     }
 
@@ -183,10 +189,16 @@ function Reservar({ reservas = [], agregar }) {
     setDatos({ ...datos, [name]: value });
   }
 
+  // Borra todo lo que se escribió en el formulario
+  function limpiarFormulario() {
+    setDatos({ ...datosIniciales, fecha: fechaDeHoy() });
+    setErrores({});
+  }
+
   function manejarEnvio(evento) {
     evento.preventDefault();
 
-    const nuevosErrores = validar(datos, reservas, minimo);
+    const nuevosErrores = validar(datos, reservas);
     setErrores(nuevosErrores);
 
     // Si hay al menos un error, no se guarda nada
@@ -202,7 +214,7 @@ function Reservar({ reservas = [], agregar }) {
       duracion: Number(datos.duracion),
       cliente: `${datos.apellido.trim()}, ${datos.nombre.trim()}`,
       telefono: datos.telefono,
-      sena: Number(datos.sena),
+      sena: sena,
       politica: true,
     });
 
@@ -319,29 +331,32 @@ function Reservar({ reservas = [], agregar }) {
                   <Col md={4}>
                     <Form.Group controlId="duracion">
                       <Form.Label className="fw-semibold">Duración</Form.Label>
-                      <Form.Select name="duracion" size="lg" value={datos.duracion} onChange={manejarCambio}>
+                      <Form.Select name="duracion" size="lg" value={datos.duracion} onChange={manejarCambio} disabled={datos.canchaId === ''} isInvalid={Boolean(errores.duracion)}>
+                        <option value="">
+                          {datos.canchaId === '' ? 'Elegí la cancha' : 'Elegí la duración'}
+                        </option>
                         {duraciones.map((opcion) => (
                           <option key={opcion} value={opcion}>
                             {opcion} h
                           </option>
                         ))}
                       </Form.Select>
+                      <Form.Control.Feedback type="invalid">
+                        {errores.duracion}
+                      </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
 
                   <Col xs={12}>
                     <Alert variant="light" className="mb-0">
-                      El turno sale <strong>{formatearPrecio(precio)}</strong> — seña mínima <strong>{formatearPrecio(minimo)}</strong>
+                      El turno sale <strong>{formatearPrecio(precio)}</strong>
                     </Alert>
                   </Col>
 
                   <Col md={6}>
                     <Form.Group controlId="sena">
-                      <Form.Label className="fw-semibold">Seña recibida</Form.Label>
-                      <Form.Control type="number" name="sena" size="lg" min={minimo} placeholder={String(minimo)} value={datos.sena} onChange={manejarCambio} isInvalid={Boolean(errores.sena)}/>
-                      <Form.Control.Feedback type="invalid">
-                        {errores.sena}
-                      </Form.Control.Feedback>
+                      <Form.Label className="fw-semibold">Seña recibida (mitad del valor del turno)</Form.Label>
+                      <Form.Control type="text" size="lg" className="bg-light" readOnly value={sena === 0 ? '' : formatearPrecio(sena)} placeholder="$"/>
                     </Form.Group>
                   </Col>
 
@@ -351,9 +366,12 @@ function Reservar({ reservas = [], agregar }) {
                     </Form.Group>
                   </Col>
 
-                  <Col xs={12} className="d-grid d-sm-block">
-                    <Button type="submit" size="lg" className="btn-club px-4">
+                  <Col xs={12} className="d-grid gap-2 d-sm-flex">
+                    <Button type="submit" size="lg" className="btn-club rounded-3 px-4">
                       Guardar reserva
+                    </Button>
+                    <Button type="button" size="lg" variant="danger" className="px-4" onClick={limpiarFormulario}>
+                      Cancelar
                     </Button>
                   </Col>
                 </Row>
