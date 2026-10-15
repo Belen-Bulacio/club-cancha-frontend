@@ -21,7 +21,7 @@ function NavegacionPrincipal() {
     <Navbar as="header" expand="lg" className="navbar-club py-2" variant="dark" sticky="top" expanded={abierto} onToggle={setAbierto}>
       <Container>
         <Navbar.Brand as={Link} to="/" onClick={cerrarMenu}>
-          <Image src="/logo-club.png" alt="Club Cancha" style={{ height: '40px', width: 'auto' }} />
+          <Image src="/logo-club.png" alt="Club Cancha" style={{ height: '80px', width: 'auto', margin: '-10px 0' }} />
         </Navbar.Brand>
 
         <Navbar.Toggle aria-controls="menu-principal" />
