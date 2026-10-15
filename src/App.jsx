@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import SubirAlInicio from './components/SubirAlInicio';
 import Rutas from './components/routes/Rutas';
 import { reservasIniciales } from './data/datosIniciales';
 
@@ -51,6 +52,7 @@ function App() {
 
   return (
     <>
+      <SubirAlInicio />
       <Navbar />
       <Rutas
         reservas={reservas}
